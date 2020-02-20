@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/tls"
-	"flag"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -13,6 +12,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -21,76 +21,44 @@ type Scope struct {
 	identifier string
 }
 
-/*var (
-	validCookies []string
-	protectedScopeRequired map[string][]Scope
-)*/
-
-var (
-	clientId string
-	clientSecret string
-	issuer string
-	host string
-)
-
-// sudo ./bst_web -static="./dist" -entry="./dist/index.html" -clientid="" -clientsecret="" -issuer="" -host="abc.com"
-
 func main() {
-	var entry string
-	var port string
-	var jsdir string
-	var protectedDirectory string
-	var static string
-
-	flag.StringVar(&entry, "entry", "./index.html", "the entrypoint to serve.")
-	flag.StringVar(&static, "static", "./dist", "the directory to serve static files from.")
-	flag.StringVar(&jsdir, "jsdir", "./dist/js", "the directory to serve js files from")
-	flag.StringVar(&port, "port", "8000", "the `port` to listen on.")
-	flag.StringVar(&protectedDirectory, "protecteddirectory", "./dist/protected", "the directory containing protected files")
-	flag.StringVar(&clientId, "clientid", "", "client id for oauth2 client")
-	flag.StringVar(&clientSecret, "clientsecret", "", "client secret for oauth2 client")
-	flag.StringVar(&issuer, "issuer", "", "issuer for oauth2 client")
-	flag.StringVar(&host, "host", "", "host")
-	flag.Parse()
+	LoadConfig()
 
 	InitStore()
 
 	r := mux.NewRouter()
 
+	commonMiddleware := negroni.New(
+		negroni.HandlerFunc(LoggingMiddleware),
+		negroni.HandlerFunc(PathSanitizer))
+
 	r.NotFoundHandler = http.HandlerFunc(NotFoundMiddleware)
-	r.PathPrefix("/js").Handler(negroni.New(
-		negroni.HandlerFunc(LoggingMiddleware),
-		negroni.Wrap(http.FileServer(http.Dir(static)))))
+	r.PathPrefix("/js").Handler(commonMiddleware.With(
+		negroni.Wrap(http.FileServer(http.Dir(staticDirectory + javascriptDirectory)))))
 
-	r.PathPrefix("/img").Handler(negroni.New(
-		negroni.HandlerFunc(LoggingMiddleware),
-		negroni.Wrap(http.FileServer(http.Dir(static)))))
+	r.PathPrefix("/img").Handler(commonMiddleware.With(
+		negroni.Wrap(http.FileServer(http.Dir(staticDirectory + mediaDirectory)))))
 
-	r.Path("/callback").Handler(negroni.New(
-		negroni.HandlerFunc(LoggingMiddleware),
+	r.Path("/callback").Handler(commonMiddleware.With(
 		negroni.Wrap(http.HandlerFunc(CallbackHandler))))
 
-	r.Path("/login").Handler(negroni.New(
-		negroni.HandlerFunc(LoggingMiddleware),
+	r.Path("/login").Handler(commonMiddleware.With(
 		negroni.Wrap(http.HandlerFunc(LoginHandler))))
 
-	r.Path("/protected").Handler(negroni.New(
-		negroni.HandlerFunc(LoggingMiddleware),
+	r.PathPrefix(protectedDirectory).Handler(commonMiddleware.With(
 		negroni.HandlerFunc(ProtectedResourceMiddleware),
-		negroni.Wrap(http.HandlerFunc(OpenResource(static, "protected.html")))))
+		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
 
-	r.Path("/cookie").Handler(negroni.New(
-		negroni.HandlerFunc(LoggingMiddleware),
+	r.Path("/cookie").Handler(commonMiddleware.With(
 		negroni.Wrap(http.HandlerFunc(SetCookie))))
 
-	r.PathPrefix("/").Handler(negroni.New(
-		negroni.HandlerFunc(LoggingMiddleware),
+	r.PathPrefix("/").Handler(commonMiddleware.With(
 		negroni.HandlerFunc(RedirectHomeMiddleware),
-		negroni.Wrap(http.HandlerFunc(IndexHandler(entry)))))
+		negroni.Wrap(http.HandlerFunc(IndexHandler(staticDirectory + notFoundPage)))))
 
 	certManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(host),
+		HostPolicy: autocert.HostWhitelist(serveHost),
 	}
 
 	dir := cacheDir()
@@ -100,7 +68,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler:           r,
-		Addr:		":443",
+		Addr:		servePort,
 		ReadTimeout: 15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		TLSConfig: &tls.Config{
@@ -126,6 +94,14 @@ func IndexHandler(entrypoint string) func(w http.ResponseWriter, r *http.Request
 
 func LoggingMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	fmt.Printf("%s: %s%s - %s\n", time.Now().Format(time.RFC3339), r.Host, r.URL, r.Method)
+	next(rw, r)
+}
+
+func PathSanitizer(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	if strings.Contains(r.URL.String(), "..") {
+		NotFoundMiddleware(rw, r)
+		return
+	}
 	next(rw, r)
 }
 
@@ -158,7 +134,7 @@ func SetCookie(rw http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:       "protected_cookie",
 		Value:      uuid,
-		Domain:		host,
+		Domain:		serveHost,
 		Path:       "/",
 		Expires:    expireTime,
 		RawExpires: expireTime.Format(time.UnixDate),

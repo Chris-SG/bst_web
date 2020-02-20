@@ -22,7 +22,7 @@ type Authenticator struct {
 }
 
 func InitStore() error {
-	Store = sessions.NewFilesystemStore("", []byte("key"))
+	Store = sessions.NewFilesystemStore("", []byte(fileStoreKey))
 	gob.Register(map[string]interface{}{})
 	return nil
 }
@@ -30,16 +30,16 @@ func InitStore() error {
 func NewAuthenticator() (*Authenticator, error) {
 	ctx := context.Background()
 
-	provider, err := oidc.NewProvider(ctx, issuer)
+	provider, err := oidc.NewProvider(ctx, authClientIssuer)
 	if err != nil {
 		log.Printf("failed to get provider: %v", err)
 		return nil, err
 	}
 
 	conf := oauth2.Config{
-		ClientID:     clientId,
-		ClientSecret: clientSecret,
-		RedirectURL:  "https://" + host + "/callback",
+		ClientID:     authClientId,
+		ClientSecret: authClientSecret,
+		RedirectURL:  "https://" + serveHost + callbackResourcePath,
 		Endpoint: 	  provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
@@ -83,7 +83,7 @@ func CallbackHandler(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	oidcConfig := &oidc.Config{
-		ClientID: clientId,
+		ClientID: authClientId,
 	}
 
 	idToken, err := authenticator.Provider.Verifier(oidcConfig).Verify(context.TODO(), rawIDToken)
