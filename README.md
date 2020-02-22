@@ -29,8 +29,8 @@ Run with:
     -issuer="https://issuer.com/" \
     -callback="/callback" \
     -filestorekey="averysecurekey" \
-    -servehost="my.host.com" \
-    -serveport="443"
+    -host="my.host.com" \
+    -port="443"
 ```
 
 ---

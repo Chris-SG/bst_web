@@ -33,11 +33,11 @@ func main() {
 		negroni.HandlerFunc(PathSanitizer))
 
 	r.NotFoundHandler = http.HandlerFunc(NotFoundMiddleware)
-	r.PathPrefix("/js").Handler(commonMiddleware.With(
-		negroni.Wrap(http.FileServer(http.Dir(staticDirectory + javascriptDirectory)))))
+	r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
+		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
 
-	r.PathPrefix("/img").Handler(commonMiddleware.With(
-		negroni.Wrap(http.FileServer(http.Dir(staticDirectory + mediaDirectory)))))
+	r.PathPrefix(mediaDirectory).Handler(commonMiddleware.With(
+		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
 
 	r.Path("/callback").Handler(commonMiddleware.With(
 		negroni.Wrap(http.HandlerFunc(CallbackHandler))))
@@ -54,7 +54,7 @@ func main() {
 
 	r.PathPrefix("/").Handler(commonMiddleware.With(
 		negroni.HandlerFunc(RedirectHomeMiddleware),
-		negroni.Wrap(http.HandlerFunc(IndexHandler(staticDirectory + notFoundPage)))))
+		negroni.Wrap(http.HandlerFunc(IndexHandler(staticDirectory + indexPage)))))
 
 	certManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
@@ -68,7 +68,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler:           r,
-		Addr:		servePort,
+		Addr:		":" + servePort,
 		ReadTimeout: 15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		TLSConfig: &tls.Config{
@@ -87,6 +87,7 @@ func main() {
 
 func IndexHandler(entrypoint string) func(w http.ResponseWriter, r *http.Request) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("will serve " + entrypoint)
 		http.ServeFile(w, r, entrypoint)
 	}
 	return fn
