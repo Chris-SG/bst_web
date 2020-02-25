@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"golang.org/x/crypto/acme/autocert"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -45,9 +46,12 @@ func main() {
 	r.Path("/login").Handler(commonMiddleware.With(
 		negroni.Wrap(http.HandlerFunc(LoginHandler))))
 
-	r.PathPrefix(protectedDirectory).Handler(commonMiddleware.With(
+	r.Path("/logout").Handler(commonMiddleware.With(
+		negroni.Wrap(http.HandlerFunc(LogoutHandler))))
+
+	r.PathPrefix("/user").Handler(commonMiddleware.With(
 		negroni.HandlerFunc(ProtectedResourceMiddleware),
-		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
+		negroni.Wrap(http.FileServer(http.Dir(protectedDirectory)))))
 
 	r.Path("/cookie").Handler(commonMiddleware.With(
 		negroni.Wrap(http.HandlerFunc(SetCookie))))
@@ -87,8 +91,17 @@ func main() {
 
 func IndexHandler(entrypoint string) func(w http.ResponseWriter, r *http.Request) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("will serve " + entrypoint)
-		http.ServeFile(w, r, entrypoint)
+		header, err := LoadHeader(r)
+		if err != nil {
+			fmt.Println(err)
+		}
+		t, _:= template.ParseFiles(entrypoint)
+		replace := map[string]string {
+			"Header": header,
+		}
+
+		t.Execute(w, replace)
+		//http.ServeFile(w, r, entrypoint)
 	}
 	return fn
 }
@@ -152,13 +165,14 @@ func SetCookie(rw http.ResponseWriter, r *http.Request) {
 }
 
 func ProtectedResourceMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	cookie, _ := r.Cookie("protected_cookie")
-	if cookie != nil {
-		fmt.Println(cookie.Raw)
-		next(rw, r)
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	rw.WriteHeader(403)
-	rw.Write([]byte("<head>Forbidden</head>"))
+
+	rw.WriteHeader(200)
+	rw.Write([]byte(fmt.Sprintf("<head></head><body>%s</body>", session)))
 }
 
 func OpenResource(path string, resource string) func(rw http.ResponseWriter, r *http.Request) {

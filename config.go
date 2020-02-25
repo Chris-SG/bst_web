@@ -14,6 +14,7 @@ var (
 	authClientId string
 	authClientSecret string
 	authClientIssuer string
+	authClientAudience string
 	callbackResourcePath string
 
 	fileStoreKey string
@@ -34,6 +35,7 @@ func LoadConfig() {
 	flag.StringVar(&authClientId, "clientid", "", "the client ID for auth server.")
 	flag.StringVar(&authClientSecret, "clientsecret", "", "the client secret for auth server.")
 	flag.StringVar(&authClientIssuer, "issuer", "", "the issuer for auth server.")
+	flag.StringVar(&authClientAudience, "audience", "", "the audience for auth server.")
 	flag.StringVar(&callbackResourcePath, "callback", "/callback", "the callback for the auth server to use.")
 
 	flag.StringVar(&fileStoreKey, "filestorekey", "", "the key to use for filestore encryption.")

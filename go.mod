@@ -3,7 +3,9 @@ module bst_web
 go 1.13
 
 require (
+	github.com/auth0/go-jwt-middleware v0.0.0-20190805220309-36081240882b
 	github.com/coreos/go-oidc v2.2.1+incompatible
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/sessions v1.2.0

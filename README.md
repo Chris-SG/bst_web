@@ -27,6 +27,7 @@ Run with:
     -clientid="clientid" \
     -clientsecret="clientsecret" \
     -issuer="https://issuer.com/" \
+    -audience="myaudience" \
     -callback="/callback" \
     -filestorekey="averysecurekey" \
     -host="my.host.com" \
