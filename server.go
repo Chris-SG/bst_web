@@ -7,20 +7,12 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"golang.org/x/crypto/acme/autocert"
-	"html/template"
+	"text/template"
 	"log"
 	"net/http"
-	"os"
-	"os/user"
-	"path/filepath"
 	"strings"
 	"time"
 )
-
-type Scope struct {
-	name string
-	identifier string
-}
 
 func main() {
 	LoadConfig()
@@ -60,14 +52,12 @@ func main() {
 		negroni.HandlerFunc(RedirectHomeMiddleware),
 		negroni.Wrap(http.HandlerFunc(IndexHandler(staticDirectory + indexPage)))))
 
-	certManager := autocert.Manager{
+	var certManager *autocert.Manager
+
+	certManager = &autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		HostPolicy: autocert.HostWhitelist(serveHost),
-	}
-
-	dir := cacheDir()
-	if dir != "" {
-		certManager.Cache = autocert.DirCache(dir)
+		Cache: autocert.DirCache("./cert_cache"),
 	}
 
 	srv := &http.Server{
@@ -96,8 +86,10 @@ func IndexHandler(entrypoint string) func(w http.ResponseWriter, r *http.Request
 			fmt.Println(err)
 		}
 		t, _:= template.ParseFiles(entrypoint)
-		replace := map[string]string {
-			"Header": header,
+		replace := struct {
+			Header string
+		} {
+			header,
 		}
 
 		t.Execute(w, replace)
@@ -112,7 +104,8 @@ func LoggingMiddleware(rw http.ResponseWriter, r *http.Request, next http.Handle
 }
 
 func PathSanitizer(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if strings.Contains(r.URL.String(), "..") {
+	if strings.Contains(r.URL.String(), "..") ||
+	   strings.Contains(r.URL.String(), "./") {
 		NotFoundMiddleware(rw, r)
 		return
 	}
@@ -125,17 +118,6 @@ func RedirectHomeMiddleware(rw http.ResponseWriter, r *http.Request, next http.H
 		return
 	}
 	next(rw, r)
-}
-
-// cacheDir makes a consistent cache directory inside /tmp. Returns "" on error.
-func cacheDir() (dir string) {
-	if u, _ := user.Current(); u != nil {
-		dir = filepath.Join(os.TempDir(), "cache-golang-autocert-"+u.Username)
-		if err := os.MkdirAll(dir, 0700); err == nil {
-			return dir
-		}
-	}
-	return ""
 }
 
 func NotFoundMiddleware(rw http.ResponseWriter, r *http.Request) {

@@ -109,7 +109,5 @@ fabric.properties
 
 
 # other
-server.crt
-server.key
 *bst_web*
 .idea/

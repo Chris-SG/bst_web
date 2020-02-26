@@ -153,7 +153,7 @@ func LogoutHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logoutUrl.Path += "/v2/logout"
+	logoutUrl.Path += "v2/logout"
 	parameters := url.Values{}
 
 	var scheme string
