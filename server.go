@@ -18,6 +18,7 @@ func main() {
 	LoadConfig()
 
 	InitStore()
+	InitClient()
 
 	r := mux.NewRouter()
 
@@ -87,15 +88,15 @@ func main() {
 
 func IndexHandler(entrypoint string) func(w http.ResponseWriter, r *http.Request) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		header, err := LoadHeader(r)
-		if err != nil {
-			fmt.Println(err)
-		}
+		header := LoadHeader(r)
+		footer := LoadFooter()
 		t, _:= template.ParseFiles(entrypoint)
 		replace := struct {
 			Header string
+			Footer string
 		} {
 			header,
+			footer,
 		}
 
 		t.Execute(w, replace)

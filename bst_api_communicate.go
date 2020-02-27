@@ -1,0 +1,46 @@
+package main
+
+import (
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"time"
+)
+
+var (
+	client *http.Client
+)
+
+func InitClient() {
+	client = &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+		Jar:           nil,
+		Timeout:       time.Second * 5,
+	}
+}
+
+func Status_Get() string {
+	uri, _ := url.Parse(bstApi + bstApiBase + "status")
+	res, err := client.Get(uri.String());
+	if err != nil {
+		return "bad"
+	}
+
+	type Status struct {
+		Status string `json:"status"`
+	}
+	status := Status{}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+
+	err = json.Unmarshal(body, status)
+	if err != nil {
+		return "unknown"
+	}
+
+	return status.Status
+}

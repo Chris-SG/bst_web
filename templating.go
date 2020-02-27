@@ -2,10 +2,9 @@ package main
 
 import (
 	"bytes"
-	"fmt"
-	"reflect"
 	"text/template"
 	"net/http"
+	"time"
 )
 
 type ClickBox struct {
@@ -20,7 +19,7 @@ type HeaderTemplate struct {
 	Ops []ClickBox
 }
 
-func LoadHeader(r *http.Request) (string, error) {
+func LoadHeader(r *http.Request) string {
 	t, err := template.ParseFiles("./templates/header.html")
 	if err != nil {
 		panic(err)
@@ -50,12 +49,38 @@ func LoadHeader(r *http.Request) (string, error) {
 			headerTemplate.Ops = append(headerTemplate.Ops, ClickBox{Link: "/logout", Text: "Logout", Class: "btn-logout"})
 
 			t.Execute(&header, headerTemplate)
-			return header.String(), nil
+			return header.String()
 		}
 	}
 	headerTemplate.DropdownText = "Not logged in."
 	headerTemplate.Ops = append(headerTemplate.Ops, ClickBox{Link: "/login", Text: "Login", Class: "btn-login"})
 
 	t.Execute(&header, headerTemplate)
-	return header.String(), nil
+	return header.String()
+}
+
+var (
+	footerTemplate FooterTemplate
+	nextUpdate time.Time
+)
+
+type FooterTemplate struct {
+	BstApiStatus string
+}
+
+func LoadFooter() string {
+	t, err := template.ParseFiles("./templates/footer.html")
+	if err != nil {
+		panic(err)
+	}
+
+	if nextUpdate.Unix() < time.Now().Unix() {
+		footerTemplate.BstApiStatus = Status_Get()
+		nextUpdate = time.Now().Add(time.Minute * 5)
+	}
+
+	var footer bytes.Buffer
+
+	t.Execute(&footer, footerTemplate)
+	return footer.String()
 }

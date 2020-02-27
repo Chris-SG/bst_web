@@ -22,6 +22,9 @@ var (
 
 	serveHost string
 	servePort string
+
+	bstApi string
+	bstApiBase string
 )
 
 func LoadConfig() {
@@ -44,6 +47,9 @@ func LoadConfig() {
 
 	flag.StringVar(&serveHost, "host", "", "the host.")
 	flag.StringVar(&servePort, "port", "443", "the port.")
+
+	flag.StringVar(&bstApi, "api", "", "bst api host.")
+	flag.StringVar(&bstApiBase, "apibase", "/", "bst api base path.")
 
 	flag.Parse()
 }

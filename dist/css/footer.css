@@ -1,0 +1,16 @@
+.footer {
+    border-top-style: solid;
+}
+
+.footer a {
+    color: #777777;
+}
+
+.footer a#bst-api-status-ok {
+    color: #00FF00;
+}
+
+.footer a#bst-api-status-bad {
+    color: #FF0000;
+}
+
