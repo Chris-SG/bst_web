@@ -27,9 +27,15 @@ func main() {
 
 	r.NotFoundHandler = http.HandlerFunc(NotFoundMiddleware)
 	r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
+		negroni.HandlerFunc(SetContentType("application/javascript")),
 		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
 
 	r.PathPrefix(mediaDirectory).Handler(commonMiddleware.With(
+		negroni.HandlerFunc(SetMediaContentType),
+		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
+
+	r.PathPrefix(cssDirectory).Handler(commonMiddleware.With(
+		negroni.HandlerFunc(SetContentType("text/css")),
 		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
 
 	r.Path("/callback").Handler(commonMiddleware.With(
@@ -98,6 +104,18 @@ func IndexHandler(entrypoint string) func(w http.ResponseWriter, r *http.Request
 	return fn
 }
 
+func SetContentType(contentType string) func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	return func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+		rw.Header().Set("Content-Type", contentType)
+		next(rw, r)
+	}
+}
+
+func SetMediaContentType(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+
+	next(rw, r)
+}
+
 func LoggingMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	fmt.Printf("%s: %s%s - %s\n", time.Now().Format(time.RFC3339), r.Host, r.URL, r.Method)
 	next(rw, r)
@@ -109,6 +127,7 @@ func PathSanitizer(rw http.ResponseWriter, r *http.Request, next http.HandlerFun
 		NotFoundMiddleware(rw, r)
 		return
 	}
+
 	next(rw, r)
 }
 

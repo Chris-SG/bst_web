@@ -6,6 +6,7 @@ var (
 	staticDirectory string
 	indexPage string
 	notFoundPage string
+	cssDirectory string
 	javascriptDirectory string
 	mediaDirectory string
 	publicDirectory string
@@ -27,6 +28,7 @@ func LoadConfig() {
 	flag.StringVar(&staticDirectory, "static", "./dist", "the directory containing all static files.")
 	flag.StringVar(&indexPage, "index", "/index.html", "the location of the index page, relative to the `static` directory.")
 	flag.StringVar(&notFoundPage, "404", "/404.html", "the location of the 404 page, relative to the `static` directory.")
+	flag.StringVar(&cssDirectory, "css", "/css", "the directory to serve css files from, relative to the `static` directory.")
 	flag.StringVar(&javascriptDirectory, "js", "/js", "the directory to serve javascript files from, relative to the `static` directory.")
 	flag.StringVar(&mediaDirectory, "media", "/media", "the directory to serve media files from, relative to the `static` directory.")
 	flag.StringVar(&publicDirectory, "public", "/public", "the directory to serve public pages from, relative to the `static` directory.")

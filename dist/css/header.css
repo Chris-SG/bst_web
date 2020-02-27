@@ -1,8 +1,29 @@
 .header {
     overflow: hidden;
     padding: 15px 10px;
+
+    border-bottom-style: solid;
 }
 
 .header a {
+    float: left;
+}
 
+.header-right {
+    float: right;
+}
+
+.user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.user-dropdown-content {
+    display: none;
+    position: absolute;
+    z-index: 1;
+}
+
+.user-dropdown:hover .user-dropdown-content {
+    display: block;
 }

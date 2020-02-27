@@ -1,7 +1,11 @@
 <div class="header">
-    <a href="#default" class="title">BST</a>
+    <a href={{ .HomePage}} class="title">BST</a>
     <div class="header-right">
-        {{range .Ops}}<a href="{{ .Link }}">{{ .Text }}</a>{{end}}
-        {{ .LoginState}}
+        <div class="user-dropdown">
+            <span>{{ .DropdownText}}</span>
+            <div class="user-dropdown-content">
+                {{ range .Ops}}<a href="{{ .Link}}" class="{{ .Class}}">{{ .Text}}</a>{{end}}
+            </div>
+        </div>
     </div>
 </div>

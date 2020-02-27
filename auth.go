@@ -23,7 +23,7 @@ type Authenticator struct {
 }
 
 func InitStore() error {
-	Store = sessions.NewFilesystemStore("", []byte(fileStoreKey))
+	Store = sessions.NewFilesystemStore("./store", []byte(fileStoreKey))
 	gob.Register(map[string]interface{}{})
 	return nil
 }

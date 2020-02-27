@@ -3,16 +3,21 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"text/template"
 	"net/http"
 )
 
+type ClickBox struct {
+	Link string
+	Text string
+	Class string
+}
+
 type HeaderTemplate struct {
-	LoginState string
-	Ops []struct {
-		Link string
-		Text string
-	}
+	HomePage string
+	DropdownText string
+	Ops []ClickBox
 }
 
 func LoadHeader(r *http.Request) (string, error) {
@@ -26,19 +31,31 @@ func LoadHeader(r *http.Request) (string, error) {
 	}
 
 	headerTemplate := HeaderTemplate{}
+	headerTemplate.HomePage = "https://" + serveHost
 	var header bytes.Buffer
 
 	if session != nil {
 		if _, ok := session.Values["access_token"]; ok {
-			headerTemplate.LoginState = `<button onclick="location.href='/logout';">Logout</button>`
+			var nickname string
+			profileMap, ok := session.Values["profile"].(map[string]interface{})
+			if !ok {
+				nickname = "No Profile"
+			} else {
+				nickname, ok = profileMap["nickname"].(string)
+				if !ok {
+					nickname = "No Nickname"
+				}
+			}
+			headerTemplate.DropdownText = nickname
+			headerTemplate.Ops = append(headerTemplate.Ops, ClickBox{Link: "/logout", Text: "Logout", Class: "btn-logout"})
 
 			t.Execute(&header, headerTemplate)
 			return header.String(), nil
 		}
 	}
-	headerTemplate.LoginState = `<button onclick="location.href='/login';">Login</button>`
+	headerTemplate.DropdownText = "Not logged in."
+	headerTemplate.Ops = append(headerTemplate.Ops, ClickBox{Link: "/login", Text: "Login", Class: "btn-login"})
 
 	t.Execute(&header, headerTemplate)
-	fmt.Println(header.String())
 	return header.String(), nil
 }
