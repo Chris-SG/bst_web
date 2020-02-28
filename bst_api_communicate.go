@@ -27,7 +27,7 @@ func InitClient() {
 	}
 }
 
-func Status_Get() string {
+func StatusGet() string {
 	uri, _ := url.Parse("https://" + bstApi + bstApiBase + "status")
 	fmt.Println(uri.String())
 	req := &http.Request{
@@ -55,12 +55,16 @@ func Status_Get() string {
 	return status.Status
 }
 
-func Eagate_Login_Post(token string, loginRequest bst_web_models.LoginRequest) bool {
+func EagateLoginGet(r *http.Request) {
+
+}
+
+func EagateLoginPost(token string, loginRequest bst_web_models.LoginRequest) bool {
 	data, err := json.Marshal(loginRequest)
 	if err != nil {
 		return false
 	}
-	uri, _ := url.Parse(bstApi + bstApiBase + "eagate/login")
+	uri, _ := url.Parse(bstApi + bstApiBase + "user/login")
 	req := &http.Request{
 		Method:           http.MethodPost,
 		URL:              uri,
@@ -74,6 +78,6 @@ func Eagate_Login_Post(token string, loginRequest bst_web_models.LoginRequest) b
 	return true
 }
 
-func Ddr_Songs_Get() string {
+func DdrSongsGet() string {
 	return ""
 }

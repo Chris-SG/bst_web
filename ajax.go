@@ -15,5 +15,5 @@ func AjaxRouter() *mux.Router {
 
 func ApiStatus(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(200)
-	rw.Write([]byte(Status_Get()))
+	rw.Write([]byte(StatusGet()))
 }

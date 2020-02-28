@@ -77,3 +77,7 @@ func LoadFooter() string {
 	t.Execute(&footer, footerTemplate)
 	return footer.String()
 }
+
+func LoadEagateLogin(user string) string {
+
+}

@@ -50,10 +50,6 @@ func main() {
 	r.Path("/logout").Handler(commonMiddleware.With(
 		negroni.Wrap(http.HandlerFunc(LogoutHandler))))
 
-	r.PathPrefix("/user").Handler(commonMiddleware.With(
-		negroni.HandlerFunc(ProtectedResourceMiddleware),
-		negroni.Wrap(http.FileServer(http.Dir(protectedDirectory)))))
-
 	ddrRouter := mux.NewRouter().PathPrefix("/ddr").Subrouter()
 	ddrRouter.HandleFunc("/songs", DDRSongs)
 	ddrRouter.HandleFunc("/songs/{id}", DDRSongsId)
@@ -63,6 +59,10 @@ func main() {
 
 	r.PathPrefix("/ajax").Handler(commonMiddleware.With(
 		negroni.Wrap(AjaxRouter())))
+
+	r.PathPrefix("/user").Handler(commonMiddleware.With(
+		negroni.HandlerFunc(ProtectedResourceMiddleware),
+		negroni.Wrap(UserRouter())))
 
 	r.PathPrefix("/").Handler(commonMiddleware.With(
 		negroni.HandlerFunc(RedirectHomeMiddleware),
