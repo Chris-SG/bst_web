@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/chris-sg/bst_server_models/bst_api_models"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/chris-sg/bst_server_models/bst_web_models"
 )
 
 var (
@@ -37,10 +40,7 @@ func Status_Get() string {
 		return "bad"
 	}
 
-	type Status struct {
-		Status string `json:"status"`
-	}
-	status := Status{}
+	status := bst_api_models.Status{}
 
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
@@ -55,13 +55,7 @@ func Status_Get() string {
 	return status.Status
 }
 
-type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	OneTimePassword string `json:"otp,omitempty"`
-}
-
-func Eagate_Login_Post(token string, loginRequest LoginRequest) bool {
+func Eagate_Login_Post(token string, loginRequest bst_web_models.LoginRequest) bool {
 	data, err := json.Marshal(loginRequest)
 	if err != nil {
 		return false
