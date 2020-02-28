@@ -2,9 +2,8 @@ package main
 
 import (
 	"bytes"
-	"text/template"
 	"net/http"
-	"time"
+	"text/template"
 )
 
 type ClickBox struct {
@@ -59,11 +58,6 @@ func LoadHeader(r *http.Request) string {
 	return header.String()
 }
 
-var (
-	footerTemplate FooterTemplate
-	nextUpdate time.Time
-)
-
 type FooterTemplate struct {
 	BstApiStatus string
 }
@@ -74,12 +68,11 @@ func LoadFooter() string {
 		panic(err)
 	}
 
-	if nextUpdate.Unix() < time.Now().Unix() {
-		footerTemplate.BstApiStatus = Status_Get()
-		nextUpdate = time.Now().Add(time.Minute * 5)
-	}
-
 	var footer bytes.Buffer
+
+	footerTemplate := FooterTemplate{
+		BstApiStatus: "unknown",
+	}
 
 	t.Execute(&footer, footerTemplate)
 	return footer.String()
