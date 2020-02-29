@@ -15,5 +15,5 @@ func UserRouter() *mux.Router {
 
 func UserProfile(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(200)
-	rw.Write([]byte(Status_Get()))
+	rw.Write([]byte(StatusGet()))
 }

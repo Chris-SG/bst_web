@@ -53,6 +53,7 @@ func main() {
 	ddrRouter := mux.NewRouter().PathPrefix("/ddr").Subrouter()
 	ddrRouter.HandleFunc("/songs", DDRSongs)
 	ddrRouter.HandleFunc("/songs/{id}", DDRSongsId)
+	ddrRouter.HandleFunc("/songs/update", DdrSongsPatch)
 
 	r.PathPrefix("/ddr").Handler(commonMiddleware.With(
 		negroni.Wrap(ddrRouter)))

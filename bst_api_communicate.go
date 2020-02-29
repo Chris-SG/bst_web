@@ -81,3 +81,15 @@ func EagateLoginPost(token string, loginRequest bst_web_models.LoginRequest) boo
 func DdrSongsGet() string {
 	return ""
 }
+
+func DDRUpdateSongs(token string) {
+	uri, _ := url.Parse("https://" + bstApi + bstApiBase + "ddr/songs")
+	fmt.Println(uri.String())
+	req := &http.Request{
+		Method:           http.MethodPatch,
+		URL:              uri,
+		Header:           make(map[string][]string),
+	}
+	req.Header["Authorization"] = []string{"Bearer " + token}
+	client.Do(req)
+}

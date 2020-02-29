@@ -78,6 +78,5 @@ func LoadFooter() string {
 	return footer.String()
 }
 
-func LoadEagateLogin(user string) string {
-
+func LoadEagateLogin(user string) {
 }
