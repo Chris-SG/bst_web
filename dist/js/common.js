@@ -12,3 +12,9 @@ function GetApiStatus() {
     xhttp.send();
 }
 GetApiStatus();
+
+$(document).ready(function() {
+    $('.btn-logout').click(function(e) {
+        Cookies.remove('auth-session');
+    });
+});

@@ -5,12 +5,18 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/gob"
+	"encoding/json"
+	"fmt"
 	"github.com/coreos/go-oidc"
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
+	"time"
 )
 var (
 	Store *sessions.FilesystemStore
@@ -42,7 +48,7 @@ func NewAuthenticator() (*Authenticator, error) {
 		ClientSecret: authClientSecret,
 		RedirectURL:  "https://" + serveHost + callbackResourcePath,
 		Endpoint: 	  provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "profile"},
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "offline_access"},
 	}
 
 	return &Authenticator{
@@ -83,6 +89,12 @@ func CallbackHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	refreshToken, ok := token.Extra("refresh_token").(string)
+	if !ok {
+		http.Error(rw, "No refresh_token field in oauth2 token.", http.StatusInternalServerError)
+		return
+	}
+
 	oidcConfig := &oidc.Config{
 		ClientID: authClientId,
 	}
@@ -103,6 +115,7 @@ func CallbackHandler(rw http.ResponseWriter, r *http.Request) {
 
 	session.Values["id_token"] = rawIDToken
 	session.Values["access_token"] = token.AccessToken
+	session.Values["refresh_token"] = refreshToken
 	session.Values["profile"] = profile
 	err = session.Save(r, rw)
 	if err != nil {
@@ -142,7 +155,7 @@ func LoginHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(rw, r, authenticator.Config.AuthCodeURL(state), http.StatusTemporaryRedirect)
+	http.Redirect(rw, r, authenticator.Config.AuthCodeURL(state, oauth2.AccessTypeOffline), http.StatusTemporaryRedirect)
 }
 
 func LogoutHandler(rw http.ResponseWriter, r *http.Request) {
@@ -173,4 +186,121 @@ func LogoutHandler(rw http.ResponseWriter, r *http.Request) {
 	logoutUrl.RawQuery = parameters.Encode()
 
 	http.Redirect(rw, r, logoutUrl.String(), http.StatusTemporaryRedirect)
+}
+
+func RefreshJwt(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		next(rw, r)
+		return
+	}
+
+	if session.Values["profile"] == nil {
+		next(rw, r)
+		return
+	}
+
+	profile := session.Values["profile"].(map[string]interface{})
+	expTime := time.Unix(int64(profile["exp"].(float64)), 0)
+	iat := time.Unix(int64(profile["iat"].(float64)), 0)
+	buffer := (expTime.Unix() - iat.Unix()) / 10
+	if expTime.Unix() < time.Now().Add(time.Second * time.Duration(buffer)).Unix() {
+		refreshToken := session.Values["refresh_token"].(string)
+		authEndpoint, err := url.Parse(authClientIssuer + "oauth/token")
+
+		data := url.Values{
+			"grant_type": {"refresh_token"},
+			"client_id": {authClientId},
+			"client_secret": {authClientSecret},
+			"refresh_token": {refreshToken},
+		}
+
+		req, _ := http.NewRequest(http.MethodPost, authEndpoint.String(), strings.NewReader(data.Encode()))
+		req.Header.Add("content-type", "application/x-www-form-urlencoded")
+		req.Header.Add("content-length", strconv.Itoa(len(data.Encode())))
+		res, _ := http.DefaultClient.Do(req)
+
+		defer res.Body.Close()
+		body, _ := ioutil.ReadAll(res.Body)
+
+		responseMap := make(map[string]interface{})
+		err = json.Unmarshal(body, &responseMap)
+		if err != nil {
+			fmt.Println(err)
+			next(rw, r)
+			return
+		}
+
+		rawIDToken, ok := responseMap["id_token"].(string)
+		if !ok {
+			http.Error(rw, "No id_token field in oauth2 token.", http.StatusInternalServerError)
+			return
+		}
+
+		oidcConfig := &oidc.Config{
+			ClientID: authClientId,
+		}
+
+		authenticator, err := NewAuthenticator()
+		if err != nil {
+			fmt.Println(err)
+			next(rw, r)
+			return
+		}
+
+		idToken, err := authenticator.Provider.Verifier(oidcConfig).Verify(context.TODO(), rawIDToken)
+
+		if err != nil {
+			fmt.Println(err)
+			next(rw, r)
+			return
+		}
+
+		var updatedProfile map[string]interface{}
+		if err := idToken.Claims(&updatedProfile); err != nil {
+			fmt.Println(err)
+			next(rw, r)
+			return
+		}
+
+		session.Values["id_token"] = rawIDToken
+		session.Values["access_token"] = responseMap["access_token"]
+		session.Values["refresh_token"] = refreshToken
+		session.Values["profile"] = updatedProfile
+		err = session.Save(r, rw)
+		if err != nil {
+			fmt.Println(err)
+			next(rw, r)
+			return
+		}
+	}
+
+	next(rw, r)
+}
+
+func LogoutIfExpired(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		next(rw, r)
+		return
+	}
+
+	if session.Values["profile"] == nil {
+		next(rw, r)
+		return
+	}
+
+	profile := session.Values["profile"].(map[string]interface{})
+	expTime := time.Unix(int64(profile["exp"].(float64)), 0)
+	if expTime.Unix() < time.Now().Unix() {
+		cookie := &http.Cookie {
+			Name: "auth-session",
+			Value: "",
+			Expires: time.Unix(0, 0),
+			Domain: serveHost,
+			Path: "/",
+		}
+		http.SetCookie(rw, cookie)
+	}
+	next(rw, r)
 }

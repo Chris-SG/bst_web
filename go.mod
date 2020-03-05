@@ -4,10 +4,9 @@ go 1.13
 
 require (
 	github.com/auth0/go-jwt-middleware v0.0.0-20190805220309-36081240882b
-	github.com/chris-sg/bst_server_models v0.0.0-20200228075122-635b259117ff
+	github.com/chris-sg/bst_server_models v0.0.0-20200303113122-99435f4d9446
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/sessions v1.2.0
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect

@@ -3,6 +3,8 @@ github.com/auth0/go-jwt-middleware v0.0.0-20190805220309-36081240882b h1:CvoEHGm
 github.com/auth0/go-jwt-middleware v0.0.0-20190805220309-36081240882b/go.mod h1:LWMyo4iOLWXHGdBki7NIht1kHru/0wM179h+d3g8ATM=
 github.com/chris-sg/bst_server_models v0.0.0-20200228075122-635b259117ff h1:MB0/Tcy8NZjqPuRMSNZqfR97BaRBgreukGgGeGOP9uk=
 github.com/chris-sg/bst_server_models v0.0.0-20200228075122-635b259117ff/go.mod h1:QAm0zB8hwap1niFFJWwSf7AJz/0Bh1q5RCDvTXP/p4o=
+github.com/chris-sg/bst_server_models v0.0.0-20200303113122-99435f4d9446 h1:/oJ2AmOWjSbasLq1DQ6LwuNUPeNGCm0reYm0LzNR0Co=
+github.com/chris-sg/bst_server_models v0.0.0-20200303113122-99435f4d9446/go.mod h1:QAm0zB8hwap1niFFJWwSf7AJz/0Bh1q5RCDvTXP/p4o=
 github.com/coreos/go-oidc v2.2.1+incompatible h1:mh48q/BqXqgjVHpy2ZY7WnWAbenxRjsz9N1i1YxjHAk=
 github.com/coreos/go-oidc v2.2.1+incompatible/go.mod h1:CgnwVTmzoESiwO9qyAFEMiHoZ1nMCKZlZ9V6mm3/LKc=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
@@ -11,8 +13,6 @@ github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumC
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
-github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
-github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 h1:EGx4pi6eqNxGaHF6qqu48+N2wcFQ5qg5FXgOdqsJ5d8=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
 github.com/gorilla/mux v1.7.4 h1:VuZ8uybHlWmqV03+zRzdwKL4tUnIp1MAQtp1mIFE1bc=

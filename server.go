@@ -3,15 +3,19 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"golang.org/x/crypto/acme/autocert"
-	"text/template"
 	"log"
 	"net/http"
 	"strings"
+	"text/template"
 	"time"
+)
+
+var (
+	commonMiddleware *negroni.Negroni
+	protectionMiddleware *negroni.Negroni
 )
 
 func main() {
@@ -24,9 +28,13 @@ func main() {
 
 	logger := negroni.NewLogger()
 
-	commonMiddleware := negroni.New(
+	commonMiddleware = negroni.New(
 		negroni.HandlerFunc(logger.ServeHTTP),
-		negroni.HandlerFunc(PathSanitizer))
+		negroni.HandlerFunc(PathSanitizer),
+		negroni.HandlerFunc(RefreshJwt),
+		negroni.HandlerFunc(LogoutIfExpired))
+	protectionMiddleware = negroni.New(
+		negroni.HandlerFunc(ProtectedResourceMiddleware))
 
 	r.NotFoundHandler = http.HandlerFunc(NotFoundMiddleware)
 	r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
@@ -62,8 +70,8 @@ func main() {
 		negroni.Wrap(AjaxRouter())))
 
 	r.PathPrefix("/user").Handler(commonMiddleware.With(
-		negroni.HandlerFunc(ProtectedResourceMiddleware),
-		negroni.Wrap(UserRouter())))
+		negroni.Wrap(protectionMiddleware.With(
+			negroni.Wrap(UserRouter())))))
 
 	r.PathPrefix("/").Handler(commonMiddleware.With(
 		negroni.HandlerFunc(RedirectHomeMiddleware),
@@ -127,11 +135,6 @@ func SetMediaContentType(rw http.ResponseWriter, r *http.Request, next http.Hand
 	next(rw, r)
 }
 
-func LoggingMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	fmt.Printf("%s: %s%s - %s\n", time.Now().Format(time.RFC3339), r.Host, r.URL, r.Method)
-	next(rw, r)
-}
-
 func PathSanitizer(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if strings.Contains(r.URL.String(), "..") ||
 	   strings.Contains(r.URL.String(), "./") {
@@ -154,28 +157,6 @@ func NotFoundMiddleware(rw http.ResponseWriter, r *http.Request) {
 	http.Redirect(rw, r, "https://" + r.Host, 301)
 }
 
-func SetCookie(rw http.ResponseWriter, r *http.Request) {
-	expireTime := time.Now().AddDate(0,0, 1)
-	uuid := uuid.New().String()
-	cookie := &http.Cookie{
-		Name:       "protected_cookie",
-		Value:      uuid,
-		Domain:		serveHost,
-		Path:       "/",
-		Expires:    expireTime,
-		RawExpires: expireTime.Format(time.UnixDate),
-		MaxAge:     86400,
-		Secure:     true,
-		HttpOnly:   true,
-		SameSite:   http.SameSiteDefaultMode,
-		Raw:        "protected_cookie=" + uuid,
-		Unparsed:   []string{"protected_cookie" + uuid},
-	}
-	fmt.Println(cookie)
-	//validCookies := append(validCookies, uuid)
-	http.SetCookie(rw, cookie)
-}
-
 func ProtectedResourceMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
@@ -183,8 +164,21 @@ func ProtectedResourceMiddleware(rw http.ResponseWriter, r *http.Request, next h
 		return
 	}
 
-	rw.WriteHeader(200)
-	rw.Write([]byte(fmt.Sprintf("<head></head><body>%s</body>", session)))
+	if session.Values["profile"] == nil {
+		rw.WriteHeader(http.StatusForbidden)
+		rw.Write([]byte("you are not currently logged in."))
+		return
+	}
+
+	profile := session.Values["profile"].(map[string]interface{})
+	expTime := time.Unix(int64(profile["exp"].(float64)), 0)
+	if expTime.Unix() < time.Now().Unix() {
+		rw.WriteHeader(http.StatusForbidden)
+		rw.Write([]byte("your session has expired."))
+		return
+	}
+
+	next(rw, r)
 }
 
 func OpenResource(path string, resource string) func(rw http.ResponseWriter, r *http.Request) {

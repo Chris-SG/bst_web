@@ -40,7 +40,7 @@ func StatusGet() string {
 		return "bad"
 	}
 
-	status := bst_api_models.Status{}
+	status := bst_api_models.ApiStatus{}
 
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
@@ -52,7 +52,10 @@ func StatusGet() string {
 		return "unknown"
 	}
 
-	return status.Status
+	fmt.Println(body)
+	fmt.Println(status)
+
+	return status.Api
 }
 
 func EagateLoginGet(r *http.Request) {
