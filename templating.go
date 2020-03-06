@@ -79,4 +79,5 @@ func LoadFooter() string {
 }
 
 func LoadEagateLogin(user string) {
+
 }

@@ -304,3 +304,19 @@ func LogoutIfExpired(rw http.ResponseWriter, r *http.Request, next http.HandlerF
 	}
 	next(rw, r)
 }
+
+func TokenForRequest(r *http.Request) (token string, err error) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		err = fmt.Errorf("not logged in")
+		return
+	}
+
+	if session.Values["id_token"] == nil {
+		err = fmt.Errorf("not logged in")
+		return
+	}
+
+	token = session.Values["id_token"].(string)
+	return
+}

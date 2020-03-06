@@ -25,18 +25,32 @@ func main() {
 	InitClient()
 
 	r := mux.NewRouter()
-
 	logger := negroni.NewLogger()
 
+	// MIDDLEWARE DEFINITIONS
 	commonMiddleware = negroni.New(
 		negroni.HandlerFunc(logger.ServeHTTP),
 		negroni.HandlerFunc(PathSanitizer),
 		negroni.HandlerFunc(RefreshJwt),
 		negroni.HandlerFunc(LogoutIfExpired))
+
 	protectionMiddleware = negroni.New(
 		negroni.HandlerFunc(ProtectedResourceMiddleware))
 
+
 	r.NotFoundHandler = http.HandlerFunc(NotFoundMiddleware)
+
+	// SUB-ROUTERS
+	r.PathPrefix("/external").Handler(commonMiddleware.With(
+		negroni.Wrap(CreateExternalRouters(nil))))
+
+	r.PathPrefix("/user").Handler(commonMiddleware.With(
+		negroni.Wrap(protectionMiddleware.With(
+			negroni.Wrap(UserRouter())))))
+
+	AttachAuthRoutes(r)
+
+	// FILESERVERS
 	r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
 		negroni.HandlerFunc(SetContentType("application/javascript")),
 		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
@@ -48,30 +62,6 @@ func main() {
 	r.PathPrefix(cssDirectory).Handler(commonMiddleware.With(
 		negroni.HandlerFunc(SetContentType("text/css")),
 		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
-
-	r.Path("/callback").Handler(commonMiddleware.With(
-		negroni.Wrap(http.HandlerFunc(CallbackHandler))))
-
-	r.Path("/login").Handler(commonMiddleware.With(
-		negroni.Wrap(http.HandlerFunc(LoginHandler))))
-
-	r.Path("/logout").Handler(commonMiddleware.With(
-		negroni.Wrap(http.HandlerFunc(LogoutHandler))))
-
-	ddrRouter := mux.NewRouter().PathPrefix("/ddr").Subrouter()
-	ddrRouter.HandleFunc("/songs", DDRSongs)
-	ddrRouter.HandleFunc("/songs/{id}", DDRSongsId)
-	ddrRouter.HandleFunc("/songs/update", DdrSongsPatch)
-
-	r.PathPrefix("/ddr").Handler(commonMiddleware.With(
-		negroni.Wrap(ddrRouter)))
-
-	r.PathPrefix("/ajax").Handler(commonMiddleware.With(
-		negroni.Wrap(AjaxRouter())))
-
-	r.PathPrefix("/user").Handler(commonMiddleware.With(
-		negroni.Wrap(protectionMiddleware.With(
-			negroni.Wrap(UserRouter())))))
 
 	r.PathPrefix("/").Handler(commonMiddleware.With(
 		negroni.HandlerFunc(RedirectHomeMiddleware),

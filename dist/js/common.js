@@ -1,15 +1,19 @@
 function GetApiStatus() {
     var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            var status = this.responseText;
+    xhttp.responseType = 'json';
+    xhttp.open('GET', '/external/bst_api/status', true);
 
-            $(".footer a")[0].setAttribute("id", "bst-api-status-" + status);
-            $(".footer a").text("BST API STATUS: " + status);
+    xhttp.onload = function() {
+        if (this.status == 200) {
+            let status = xhttp.response;
+            console.log(status)
+
+            $(".footer a")[0].setAttribute("class", "bst-api-status-" + status.api);
+            $(".footer a").text("BST API STATUS: " + status.api);
         }
     };
-    xhttp.open("GET", "/ajax/apistatus", true);
     xhttp.send();
+
 }
 GetApiStatus();
 
@@ -18,3 +22,15 @@ $(document).ready(function() {
         Cookies.remove('auth-session');
     });
 });
+
+function LoginAttempt() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 302) {
+            var l = this.responseURL;
+            window.location = l;
+        }
+    };
+    xhttp.open("GET", "/login", true);
+    xhttp.send();
+}
