@@ -45,6 +45,7 @@ func LoadHeader(r *http.Request) string {
 				}
 			}
 			headerTemplate.DropdownText = nickname
+			headerTemplate.Ops = append(headerTemplate.Ops, ClickBox{Link: "/user", Text: "Profile", Class: "btn-profile"})
 			headerTemplate.Ops = append(headerTemplate.Ops, ClickBox{Link: "/logout", Text: "Logout", Class: "btn-logout"})
 
 			t.Execute(&header, headerTemplate)
