@@ -42,18 +42,13 @@ func main() {
 
 	// SUB-ROUTERS
 	r.PathPrefix("/external").Handler(commonMiddleware.With(
-		negroni.Wrap(CreateExternalRouters(nil))))
+		negroni.Wrap(CreateExternalRouters("", nil))))
 
 	r.PathPrefix("/user").Handler(commonMiddleware.With(
 		negroni.Wrap(protectionMiddleware.With(
 			negroni.Wrap(UserRouter())))))
 
 	AttachAuthRoutes(r)
-
-
-	fmt.Println("-----WALKING ROUTES-----")
-	r.Walk(walk)
-	fmt.Println("-----FINISHED WALK-----")
 
 	// FILESERVERS
 	r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
