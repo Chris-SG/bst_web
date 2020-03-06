@@ -31,7 +31,7 @@ func UserProfile(rw http.ResponseWriter, r *http.Request) {
 		fmt.Sprint(session),
 		footer,
 	}
-	fmt.Println("Working")
+
 	rw.WriteHeader(200)
 	t.Execute(rw, replace)
 }

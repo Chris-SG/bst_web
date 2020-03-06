@@ -27,6 +27,7 @@ var (
 	bstApiBase string
 )
 
+// LoadConfig populates general configuration values to be used with the program.
 func LoadConfig() {
 	flag.StringVar(&staticDirectory, "static", "./dist", "the directory containing all static files.")
 	flag.StringVar(&indexPage, "index", "/index.html", "the location of the index page, relative to the `static` directory.")

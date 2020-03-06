@@ -28,12 +28,15 @@ type Authenticator struct {
 	Ctx      context.Context
 }
 
+// InitStore will ensure a store for auth data exists.
 func InitStore() error {
 	Store = sessions.NewFilesystemStore("./store", []byte(fileStoreKey))
 	gob.Register(map[string]interface{}{})
 	return nil
 }
 
+// NewAuthenticator will provide an authenticator to be used against
+// the designated authorization server.
 func NewAuthenticator() (*Authenticator, error) {
 	ctx := context.Background()
 
@@ -58,6 +61,7 @@ func NewAuthenticator() (*Authenticator, error) {
 	}, nil
 }
 
+// CallbackHandler handles the token exchange part of the authorzization flow.
 func CallbackHandler(rw http.ResponseWriter, r *http.Request) {
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
@@ -127,6 +131,8 @@ func CallbackHandler(rw http.ResponseWriter, r *http.Request) {
 	http.Redirect(rw, r, "/user", http.StatusSeeOther)
 }
 
+// LoginHandler will create a session for the user and initiate the
+// login flow.
 func LoginHandler(rw http.ResponseWriter, r *http.Request) {
 	// Generate random state
 	b := make([]byte, 32)
@@ -158,6 +164,7 @@ func LoginHandler(rw http.ResponseWriter, r *http.Request) {
 	http.Redirect(rw, r, authenticator.Config.AuthCodeURL(state, oauth2.AccessTypeOffline), http.StatusTemporaryRedirect)
 }
 
+// Logout will remove a users login state.
 func LogoutHandler(rw http.ResponseWriter, r *http.Request) {
 	logoutUrl, err := url.Parse(authClientIssuer)
 
@@ -188,6 +195,8 @@ func LogoutHandler(rw http.ResponseWriter, r *http.Request) {
 	http.Redirect(rw, r, logoutUrl.String(), http.StatusTemporaryRedirect)
 }
 
+// RefreshJwt will send a refresh request to the designated authorization server
+// in case expiry is near.
 func RefreshJwt(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
@@ -278,6 +287,8 @@ func RefreshJwt(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) 
 	next(rw, r)
 }
 
+// LogoutIfExpired will ensure the user is logged out if the token happens to
+// expire without being successfully renewed.
 func LogoutIfExpired(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
@@ -305,6 +316,7 @@ func LogoutIfExpired(rw http.ResponseWriter, r *http.Request, next http.HandlerF
 	next(rw, r)
 }
 
+// TokenRequest retrieves the users id token.
 func TokenForRequest(r *http.Request) (token string, err error) {
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {

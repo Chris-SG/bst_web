@@ -25,6 +25,9 @@ type JSONWebKeys struct {
 	X5c []string `json:"x5c"`
 }
 
+// GetJWTMiddleware provides middleware that will validate the
+// id token of a request. This includes ensuring the issuer is
+// legitimate and the audience is as expected.
 func GetJWTMiddleware() *jwtmiddleware.JWTMiddleware{
 
 	return jwtmiddleware.New(jwtmiddleware.Options {

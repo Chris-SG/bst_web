@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+// AttachAuthRoutes attaches the router endpoints to the provided
+// router that will be used in authentication.
 func AttachAuthRoutes(r *mux.Router) {
 	r.Path("/callback").Handler(commonMiddleware.With(
 		negroni.Wrap(http.HandlerFunc(CallbackHandler))))
