@@ -33,6 +33,8 @@ func CreateBstApiRouter(middleware map[string]*negroni.Negroni) *mux.Router {
 	bstApiRouter.Path("/status").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(StatusGet))))
 
+	bstApiRouter.Walk(walk)
+
 	return bstApiRouter
 }
 

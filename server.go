@@ -50,6 +50,11 @@ func main() {
 
 	AttachAuthRoutes(r)
 
+
+	fmt.Println("-----WALKING ROUTES-----")
+	r.Walk(walk)
+	fmt.Println("-----FINISHED WALK-----")
+
 	// FILESERVERS
 	r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
 		negroni.HandlerFunc(SetContentType("application/javascript")),
