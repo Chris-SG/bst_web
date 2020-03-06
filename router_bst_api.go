@@ -29,7 +29,7 @@ func InitClient() {
 // CreateBstApiRouter will generate a router mapped against BST API. Middleware
 // may be passed in to then be used by certain routes.
 func CreateBstApiRouter(middleware map[string]*negroni.Negroni) *mux.Router {
-	bstApiRouter := mux.NewRouter().PathPrefix("/bst_api").Subrouter()
+	bstApiRouter := mux.NewRouter().PathPrefix("/external/bst_api").Subrouter()
 	bstApiRouter.Path("/status").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(StatusGet))))
 

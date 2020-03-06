@@ -8,7 +8,7 @@ import (
 
 func CreateExternalRouters(middleware map[string]*negroni.Negroni) *mux.Router {
 	externalRouter := mux.NewRouter().PathPrefix("/external").Subrouter()
-	externalRouter.PathPrefix("/external/bst_api").Handler(negroni.New(
+	externalRouter.PathPrefix("/bst_api").Handler(negroni.New(
 		negroni.Wrap(CreateBstApiRouter(middleware))))
 
 	return externalRouter
