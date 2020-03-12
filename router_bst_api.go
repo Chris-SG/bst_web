@@ -164,7 +164,7 @@ func EagateLoginPost(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	loginRequest := bst_models.LoginRequest{}
-	json.Unmarshal(body, loginRequest)
+	json.Unmarshal(body, &loginRequest)
 
 	status := EagateLoginPostImpl(token, loginRequest)
 
