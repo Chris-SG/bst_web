@@ -36,7 +36,7 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 	bstApiRouter.Path("/eagate_login").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(EagateLoginPost)))).Methods(http.MethodPost)
 	bstApiRouter.Path("/eagate_logout").Handler(negroni.New(
-		negroni.Wrap(http.HandlerFunc(EagateLoginPost)))).Methods(http.MethodPost)
+		negroni.Wrap(http.HandlerFunc(EagateLogoutPost)))).Methods(http.MethodPost)
 
 	return bstApiRouter
 }
@@ -242,6 +242,7 @@ func EagateLogoutPost(rw http.ResponseWriter, r *http.Request) {
 	if status.Status == "ok" {
 		rw.WriteHeader(http.StatusOK)
 	} else {
+		fmt.Printf("failed to logout user: %s", status.Message)
 		rw.WriteHeader(http.StatusInternalServerError)
 	}
 	rw.Write(bytes)
