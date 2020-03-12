@@ -235,6 +235,8 @@ func EagateLogoutPost(rw http.ResponseWriter, r *http.Request) {
 
 	logoutRequest := bst_models.LogoutRequest{}
 	json.Unmarshal(body, logoutRequest)
+	fmt.Printf("%s\n", body)
+	fmt.Println(logoutRequest)
 
 	status := EagateLogoutPostImpl(token, logoutRequest)
 
@@ -242,7 +244,7 @@ func EagateLogoutPost(rw http.ResponseWriter, r *http.Request) {
 	if status.Status == "ok" {
 		rw.WriteHeader(http.StatusOK)
 	} else {
-		fmt.Printf("failed to logout user: %s", status.Message)
+		fmt.Printf("failed to logout user: %s\n", status.Message)
 		rw.WriteHeader(http.StatusInternalServerError)
 	}
 	rw.Write(bytes)
