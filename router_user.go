@@ -44,7 +44,7 @@ func UserProfile(rw http.ResponseWriter, r *http.Request) {
 		"",
 	}
 	if status.Status == "ok" && len(users) > 0 {
-		replace.LoggedIn = users[0].Expired
+		replace.LoggedIn = !users[0].Expired
 		replace.EagateUsername = users[0].Username
 	}
 
