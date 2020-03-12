@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"io/ioutil"
 	"net/http"
 	"text/template"
 )
@@ -16,20 +17,35 @@ func UserRouter() *mux.Router {
 }
 
 func UserProfile(rw http.ResponseWriter, r *http.Request) {
-	header := LoadHeader(r)
-	footer := LoadFooter()
+	fileBytes, _ := ioutil.ReadFile("./dist/user_pages/user.html")
+	fileText := string(fileBytes)
 
 	session, _ := Store.Get(r, "auth-session")
 
-	t, _:= template.ParseFiles("./dist/user_pages/user.html")
+	token, _ := TokenForRequest(r)
+	status, users := EagateLoginGetImpl(token)
+
+	t, _:= template.New("user").Parse(fileText)
 	replace := struct {
 		Header string
 		LoginForm string
 		Footer string
+		CommonScripts string
+		CommonSheets string
+		LoggedIn bool
+		EagateUsername string
 	} {
-		header,
+		LoadHeader(r),
 		fmt.Sprint(session),
-		footer,
+		LoadFooter(),
+		LoadCommonScripts(),
+		LoadCommonSheets(),
+		false,
+		"",
+	}
+	if status.Status == "ok" && len(users) > 0 {
+		replace.LoggedIn = users[0].Expired
+		replace.EagateUsername = users[0].Username
 	}
 
 	rw.WriteHeader(200)

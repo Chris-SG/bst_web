@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"golang.org/x/crypto/acme/autocert"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -96,15 +97,19 @@ func main() {
 
 func IndexHandler(entrypoint string) func(w http.ResponseWriter, r *http.Request) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		header := LoadHeader(r)
-		footer := LoadFooter()
-		t, _:= template.ParseFiles(entrypoint)
+		fileBytes, _ := ioutil.ReadFile(entrypoint)
+		fileText := string(fileBytes)
+		t, _:= template.New("entry").Parse(fileText)
 		replace := struct {
 			Header string
 			Footer string
+			CommonScripts string
+			CommonSheets string
 		} {
-			header,
-			footer,
+			LoadHeader(r),
+			LoadFooter(),
+			LoadCommonScripts(),
+			LoadCommonSheets(),
 		}
 
 		t.Execute(w, replace)

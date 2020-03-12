@@ -31,7 +31,9 @@ func InitClient() {
 func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *mux.Router {
 	bstApiRouter := mux.NewRouter().PathPrefix(prefix + "/bst_api").Subrouter()
 	bstApiRouter.Path("/status").Handler(negroni.New(
-		negroni.Wrap(http.HandlerFunc(StatusGet))))
+		negroni.Wrap(http.HandlerFunc(StatusGet)))).Methods(http.MethodGet)
+	bstApiRouter.Path("/eagate_login").Handler(negroni.New(
+		negroni.Wrap(http.HandlerFunc(EagateLoginPost)))).Methods(http.MethodPost)
 
 	return bstApiRouter
 }
@@ -108,8 +110,9 @@ func EagateLoginGetImpl(token string) (status bst_models.Status, users []bst_mod
 	req := &http.Request{
 		Method:           http.MethodGet,
 		URL:              uri,
+		Header:			  make(map[string][]string),
 	}
-	req.Header["Authorization"] = []string{"Bearer " + token}
+	req.Header.Add("Authorization", "Bearer " + token)
 
 	res, err := bstApiClient.Do(req)
 	if err != nil {

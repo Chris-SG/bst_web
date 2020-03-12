@@ -1,11 +1,13 @@
 <div class="header">
-    <a href={{ .HomePage}} class="title">BST</a>
-    <div class="header-right">
-        <div class="user-dropdown">
-            <span>{{ .DropdownText}}</span>
-            <div class="user-dropdown-content">
-                {{ range .Ops}}<a href="{{ .Link}}" class="{{ .Class}}">{{ .Text}}</a>{{end}}
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{{ .HomePage}}" class="title"><strong>BST</strong></a>
+        <div class="header-right">
+            <div class="dropdown user-dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">{{ .DropdownText}}<span class="caret"></span></button>
+                <div class="dropdown-menu">
+                    {{ range .Ops}}<a href="{{ .Link}}" class="dropdown-item {{ .Class}}">{{ .Text}}</a>{{end}}
+                </div>
             </div>
         </div>
-    </div>
+    </nav>
 </div>
