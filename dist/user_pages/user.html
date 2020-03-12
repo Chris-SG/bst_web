@@ -13,7 +13,7 @@
     <a id="eagate-login-state">
     {{if .LoggedIn}}
         <p>Currently linked to {{ .EagateUsername}}.</p>
-        <button type="button" class="btn btn-primary" onClick="eagateLogout({{ .EagateUsername}})">Unlink</button>
+        <button type="button" class="btn btn-primary" onClick="eagateLogout('{{ .EagateUsername}}')">Unlink</button>
     {{else}}
         <form class="form-inline">
             <div class="form-row align-items-center">

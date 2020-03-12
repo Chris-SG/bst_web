@@ -249,7 +249,7 @@ func EagateLogoutPost(rw http.ResponseWriter, r *http.Request) {
 }
 
 func EagateLogoutPostImpl(token string, logoutRequest bst_models.LogoutRequest) (status bst_models.Status) {
-	uri, _ := url.Parse("https://" + bstApi + bstApiBase + "user/logou")
+	uri, _ := url.Parse("https://" + bstApi + bstApiBase + "user/logout")
 
 	req := &http.Request{
 		Method:           http.MethodPost,

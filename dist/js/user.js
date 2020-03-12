@@ -39,23 +39,9 @@ function eagateLogout(user) {
             loginForm.parentNode.textContent = '';
             location.reload()
         } else if (this.readyState == 4) {
-            let processing = document.getElementById('eagate-login-processing');
-            processing.parentNode.removeChild(processing);
-
-            u.value = '';
-            p.value = '';
-
-            loginForm.style.display = 'initial';
+            location.reload()
         }
     };
-
-    loginForm.style.display = 'none';
-
-    let processing = document.createElement('span');
-    processing.id = 'eagate-login-processing'
-    processing.appendChild(document.createTextNode('processing ...'));
-    loginForm.parentNode.insertBefore(processing, loginForm);
-
     xhttp.open("POST", "/external/bst_api/eagate_logout", true);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     let reqBody = JSON.stringify(JSON.parse(`{ "username": "${user}" }`));
