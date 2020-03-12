@@ -234,7 +234,7 @@ func EagateLogoutPost(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	logoutRequest := bst_models.LogoutRequest{}
-	err = json.Unmarshal(body, logoutRequest)
+	err = json.Unmarshal(body, &logoutRequest)
 	fmt.Println(err)
 	fmt.Printf("%s\n", body)
 	fmt.Println(logoutRequest)
