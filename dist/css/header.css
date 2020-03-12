@@ -5,14 +5,6 @@
     border-bottom-style: solid;
 }
 
-.header a {
-    float: left;
-}
-
-.header-right {
-    float: right;
-}
-
 .user-dropdown-content li {
     position: absolute;
     z-index: 5;

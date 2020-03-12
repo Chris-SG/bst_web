@@ -1,12 +1,15 @@
 <div class="header">
     <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="{{ .HomePage}}" class="title"><strong>BST</strong></a>
-        <div class="header-right">
-            <div class="dropdown user-dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">{{ .DropdownText}}<span class="caret"></span></button>
-                <div class="dropdown-menu">
-                    {{ range .Ops}}<a href="{{ .Link}}" class="dropdown-item {{ .Class}}">{{ .Text}}</a>{{end}}
-                </div>
+        <a class="title navbar-brand" href="{{ .HomePage}}"><strong>BST</strong></a>
+        <div id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav_item active">
+                    <a class="nav-link" href="/ddr">DDR</a>
+                </li>
+            </ul>
+            <button class="btn btn-primary dropdown-toggle mr-sm-2" type="button" data-toggle="dropdown">{{ .DropdownText}}<span class="caret"></span></button>
+            <div class="dropdown-menu">
+                {{ range .Ops}}<a href="{{ .Link}}" class="dropdown-item {{ .Class}}">{{ .Text}}</a>{{end}}
             </div>
         </div>
     </nav>

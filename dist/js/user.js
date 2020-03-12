@@ -5,7 +5,7 @@ function eagateLogin() {
 
     let xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
+        /*if (this.readyState == 4 && this.status == 200) {
             loginForm.parentNode.textContent = '';
             location.reload()
         } else if (this.readyState == 4) {
@@ -16,6 +16,10 @@ function eagateLogin() {
             p.value = '';
 
             loginForm.style.display = 'initial';
+        }*/
+        if (this.readyState == 4) {
+            console.log(xhttp.response)
+            location.reload()
         }
     };
 
@@ -26,7 +30,7 @@ function eagateLogin() {
     processing.appendChild(document.createTextNode('processing ...'));
     loginForm.parentNode.insertBefore(processing, loginForm);
 
-    xhttp.open("POST", "/external/bst_api/eagate_login", true);
+    xhttp.open("POST", "/external/bst_api/eagate_login", false);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     let reqBody = JSON.stringify(JSON.parse(`{ "username": "${u.value}", "password": "${p.value}" }`));
     xhttp.send(reqBody);
