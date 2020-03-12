@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/auth0/go-jwt-middleware v0.0.0-20190805220309-36081240882b
-	github.com/chris-sg/bst_server_models v0.0.0-20200305223228-68d0d2b6bb52
+	github.com/chris-sg/bst_server_models v0.0.0-20200312114823-f6241590b068
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gorilla/mux v1.7.4

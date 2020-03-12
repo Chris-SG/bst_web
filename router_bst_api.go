@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/chris-sg/bst_server_models"
@@ -33,6 +34,8 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 	bstApiRouter.Path("/status").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(StatusGet)))).Methods(http.MethodGet)
 	bstApiRouter.Path("/eagate_login").Handler(negroni.New(
+		negroni.Wrap(http.HandlerFunc(EagateLoginPost)))).Methods(http.MethodPost)
+	bstApiRouter.Path("/eagate_logout").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(EagateLoginPost)))).Methods(http.MethodPost)
 
 	return bstApiRouter
@@ -181,8 +184,82 @@ func EagateLoginPostImpl(token string, loginRequest bst_models.LoginRequest) (st
 	req := &http.Request{
 		Method:           http.MethodPost,
 		URL:              uri,
+		Header:			  make(map[string][]string),
 	}
-	req.Header["Authorization"] = []string{"Bearer " + token}
+	req.Header.Add("Authorization", "Bearer " + token)
+
+	b, _ := json.Marshal(loginRequest)
+	req.Body = ioutil.NopCloser(bytes.NewReader(b))
+
+	res, err := bstApiClient.Do(req)
+	if err != nil {
+		status.Status = "bad"
+		status.Message = "api error"
+		return
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	json.Unmarshal(body, &status)
+
+	return
+}
+
+func EagateLogoutPost(rw http.ResponseWriter, r *http.Request) {
+	token, err := TokenForRequest(r)
+	if err != nil {
+		status := bst_models.Status{
+			Status:  "bad",
+			Message: err.Error(),
+		}
+
+		bytes, _ := json.Marshal(status)
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write(bytes)
+		return
+	}
+
+	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		status := bst_models.Status{
+			Status:  "bad",
+			Message: err.Error(),
+		}
+
+		bytes, _ := json.Marshal(status)
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write(bytes)
+		return
+	}
+
+	logoutRequest := bst_models.LogoutRequest{}
+	json.Unmarshal(body, logoutRequest)
+
+	status := EagateLogoutPostImpl(token, logoutRequest)
+
+	bytes, _ := json.Marshal(status)
+	if status.Status == "ok" {
+		rw.WriteHeader(http.StatusOK)
+	} else {
+		rw.WriteHeader(http.StatusInternalServerError)
+	}
+	rw.Write(bytes)
+	return
+}
+
+func EagateLogoutPostImpl(token string, logoutRequest bst_models.LogoutRequest) (status bst_models.Status) {
+	uri, _ := url.Parse("https://" + bstApi + bstApiBase + "user/logou")
+
+	req := &http.Request{
+		Method:           http.MethodPost,
+		URL:              uri,
+		Header:			  make(map[string][]string),
+	}
+	req.Header.Add("Authorization", "Bearer " + token)
+
+	b, _ := json.Marshal(logoutRequest)
+	req.Body = ioutil.NopCloser(bytes.NewReader(b))
 
 	res, err := bstApiClient.Do(req)
 	if err != nil {
