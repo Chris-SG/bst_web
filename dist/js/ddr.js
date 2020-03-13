@@ -1,7 +1,6 @@
 function updateProfile() {
     let xhttp = new XMLHttpRequest();
-    let details = document.getElementById('ddr-player-details');
-    let btn = details.getElementById('ddr-player-details-update');
+    let btn = document.getElementById('ddr-player-details-update');
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4) {
             if (this.status == 200) {
