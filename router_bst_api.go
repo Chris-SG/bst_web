@@ -40,6 +40,8 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 
 	bstApiRouter.Path("/ddr_update").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(DdrUpdatePatch)))).Methods(http.MethodPatch)
+	bstApiRouter.Path("/ddr_refresh").Handler(negroni.New(
+		negroni.Wrap(http.HandlerFunc(DdrRefreshPatch)))).Methods(http.MethodPatch)
 
 	return bstApiRouter
 }
@@ -311,6 +313,57 @@ func DdrUpdatePatch(rw http.ResponseWriter, r *http.Request) {
 
 func DdrUpdatePatchImpl(token string) (status bst_models.Status) {
 	uri, _ := url.Parse("https://" + bstApi + bstApiBase + "ddr/profile/update")
+
+	req := &http.Request{
+		Method:           http.MethodPatch,
+		URL:              uri,
+		Header:			  make(map[string][]string),
+	}
+	req.Header.Add("Authorization", "Bearer " + token)
+
+	res, err := bstApiClient.Do(req)
+	if err != nil {
+		status.Status = "bad"
+		status.Message = "api error"
+		return
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	json.Unmarshal(body, &status)
+
+	return
+}
+
+func DdrRefreshPatch(rw http.ResponseWriter, r *http.Request) {
+	token, err := TokenForRequest(r)
+	if err != nil {
+		status := bst_models.Status{
+			Status:  "bad",
+			Message: err.Error(),
+		}
+
+		bytes, _ := json.Marshal(status)
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write(bytes)
+		return
+	}
+
+	status := DdrRefreshPatchImpl(token)
+
+	bytes, _ := json.Marshal(status)
+	if status.Status == "ok" {
+		rw.WriteHeader(http.StatusOK)
+	} else {
+		fmt.Printf("failed to refresh ddr profile: %s\n", status.Message)
+		rw.WriteHeader(http.StatusInternalServerError)
+	}
+	rw.Write(bytes)
+	return
+}
+
+func DdrRefreshPatchImpl(token string) (status bst_models.Status) {
+	uri, _ := url.Parse("https://" + bstApi + bstApiBase + "ddr/profile/refresh")
 
 	req := &http.Request{
 		Method:           http.MethodPatch,

@@ -1,3 +1,10 @@
+function GetEagateState() {
+    $.ajax({url: "/external/ajax/eagate_login_status", success: function(result){
+            $("#eagate-container").html(result);
+        }});
+}
+GetEagateState();
+
 function eagateLogin() {
     let u = document.getElementById("eagate-username");
     let p = document.getElementById("eagate-password");

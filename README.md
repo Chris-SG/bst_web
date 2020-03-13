@@ -76,9 +76,13 @@ Run with:
 ### DDR
 - [ ] Provide ddr API integration
   - [ ] Profile refresh
-  - [ ] Profile update
+  - [x] Profile update
   - [ ] Song retrieval
   - [ ] Score retrieval
+- [ ] Base ddr page
+  - [ ] User details
+  - [ ] Profile update
+  - [ ] Profile refresh
 - [ ] Provide song overview
   - [ ] Minified song jacket
   - [ ] Score overview

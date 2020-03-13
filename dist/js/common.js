@@ -1,19 +1,9 @@
 function GetApiStatus() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.responseType = 'json';
-    xhttp.open('GET', '/external/bst_api/status', true);
-
-    xhttp.onload = function() {
-        if (this.status == 200) {
-            let status = xhttp.response;
-            console.log(status)
-
-            $(".footer a")[0].setAttribute("class", "bst-api-status-" + status.api);
-            $(".footer a").text("BST API STATUS: " + status.api);
-        }
-    };
-    xhttp.send();
-
+    $.ajax({url: "/external/bst_api/status", dataType: "json", success: function(result){
+        console.log(result);
+        $(".footer a")[0].setAttribute("class", "bst-api-status-" + result.api);
+        $(".footer a").text("BST API STATUS: " + result.api);
+    }});
 }
 GetApiStatus();
 

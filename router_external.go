@@ -9,6 +9,8 @@ func CreateExternalRouters(prefix string, middleware map[string]*negroni.Negroni
 	externalRouter := mux.NewRouter().PathPrefix(prefix + "/external").Subrouter()
 	externalRouter.PathPrefix("/bst_api").Handler(negroni.New(
 		negroni.Wrap(CreateBstApiRouter(prefix + "/external", middleware))))
+	externalRouter.PathPrefix("/ajax").Handler(negroni.New(
+		negroni.Wrap(CreateAjaxRouter(prefix + "/external", middleware))))
 
 	return externalRouter
 }
