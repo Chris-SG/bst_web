@@ -38,6 +38,9 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 	bstApiRouter.Path("/eagate_logout").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(EagateLogoutPost)))).Methods(http.MethodPost)
 
+	bstApiRouter.Path("/ddr_update").Handler(negroni.New(
+		negroni.Wrap(http.HandlerFunc(DdrUpdatePatch)))).Methods(http.MethodPatch)
+
 	return bstApiRouter
 }
 
@@ -264,6 +267,57 @@ func EagateLogoutPostImpl(token string, logoutRequest bst_models.LogoutRequest) 
 
 	b, _ := json.Marshal(logoutRequest)
 	req.Body = ioutil.NopCloser(bytes.NewReader(b))
+
+	res, err := bstApiClient.Do(req)
+	if err != nil {
+		status.Status = "bad"
+		status.Message = "api error"
+		return
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	json.Unmarshal(body, &status)
+
+	return
+}
+
+func DdrUpdatePatch(rw http.ResponseWriter, r *http.Request) {
+	token, err := TokenForRequest(r)
+	if err != nil {
+		status := bst_models.Status{
+			Status:  "bad",
+			Message: err.Error(),
+		}
+
+		bytes, _ := json.Marshal(status)
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write(bytes)
+		return
+	}
+
+	status := DdrUpdatePatchImpl(token)
+
+	bytes, _ := json.Marshal(status)
+	if status.Status == "ok" {
+		rw.WriteHeader(http.StatusOK)
+	} else {
+		fmt.Printf("failed to update ddr profile: %s\n", status.Message)
+		rw.WriteHeader(http.StatusInternalServerError)
+	}
+	rw.Write(bytes)
+	return
+}
+
+func DdrUpdatePatchImpl(token string) (status bst_models.Status) {
+	uri, _ := url.Parse("https://" + bstApi + bstApiBase + "ddr/profile/update")
+
+	req := &http.Request{
+		Method:           http.MethodPatch,
+		URL:              uri,
+		Header:			  make(map[string][]string),
+	}
+	req.Header.Add("Authorization", "Bearer " + token)
 
 	res, err := bstApiClient.Do(req)
 	if err != nil {

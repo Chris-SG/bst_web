@@ -49,6 +49,9 @@ func main() {
 		negroni.Wrap(protectionMiddleware.With(
 			negroni.Wrap(UserRouter())))))
 
+	r.PathPrefix("/ddr").Handler(commonMiddleware.With(
+		negroni.Wrap(DdrRouter())))
+
 	AttachAuthRoutes(r)
 
 	// FILESERVERS
