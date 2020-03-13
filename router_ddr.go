@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
@@ -8,11 +9,13 @@ import (
 )
 
 func DdrRouter() *mux.Router {
-	userRouter := mux.NewRouter().PathPrefix("/ddr").Subrouter()
+	fmt.Println("Building ddr routes...")
+	ddrRouter := mux.NewRouter().PathPrefix("/ddr").Subrouter()
 
-	userRouter.HandleFunc("", DdrIndex).Methods(http.MethodGet)
+	ddrRouter.HandleFunc("", DdrIndex).Methods(http.MethodGet)
 
-	return userRouter
+	fmt.Println("Done")
+	return ddrRouter
 }
 
 func DdrIndex(rw http.ResponseWriter, r *http.Request) {
@@ -31,7 +34,7 @@ func DdrIndex(rw http.ResponseWriter, r *http.Request) {
 		LoadCommonScripts(),
 		LoadCommonSheets(),
 	}
-	
+
 	rw.WriteHeader(200)
 	t.Execute(rw, replace)
 }
