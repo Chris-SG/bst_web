@@ -25,7 +25,8 @@ function refreshProfile() {
     btn.parentNode.insertBefore(processing, btn);
 
     let update = $.ajax({url: "/external/bst_api/ddr_refresh",
-        type: "PATCH"});
+        type: "PATCH",
+        timeout: 60000});
 
     update.done(function() {
         processing.innerText = "Done!"
