@@ -18,14 +18,15 @@ function eagateLogin() {
     processing.appendChild(document.createTextNode('processing ...'));
     loginForm.parentNode.insertBefore(processing, loginForm);
 
-    $.ajax({url: "/external/bst_api/eagate_login",
+
+    $.when($.ajax({url: "/external/bst_api/eagate_login",
         type: "POST",
         data: JSON.stringify({username: u.value, password: p.value}),
         contentType: "application/json; charset=utf-8",
         dataType   : "json",
-        success: function(result){
-            location.reload()
-        }});
+        })).done(function( data ) {
+            location.reload();
+        });
 }
 
 function eagateLogout(user) {
