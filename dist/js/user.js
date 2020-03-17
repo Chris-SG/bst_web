@@ -1,7 +1,8 @@
 function GetEagateState() {
     $.ajax({url: "/external/ajax/eagate_login_status", success: function(result){
-            $("#eagate-container").html(result);
-        }});
+        console.log(result);
+        $("#eagate-container").html(result);
+    }});
 }
 GetEagateState();
 
