@@ -27,7 +27,7 @@ func EagateLoginStatusGet(rw http.ResponseWriter, r *http.Request) {
 	}
 	status, users := EagateLoginGetImpl(token)
 
-	if status.Status == "bad" {
+	if status.Status == "bad" || len(users) == 0 {
 		text := `
 		<a id="eagate-login-state">
         <form class="form-inline">
