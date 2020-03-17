@@ -7,16 +7,12 @@ function updateProfile() {
     processing.appendChild(document.createTextNode('processing ...'));
     btn.parentNode.insertBefore(processing, btn);
 
-    $.ajax({url: "/external/bst_api/ddr_update",
-        type: "PATCH",
-        dataType: "json",
-        success: function(result, textStatus, xhr){
-            if (xhr.status == 200) {
-                processing.innerText = "Done!"
-            } else {
-                processing.innerText = this.response
-            }
-        }});
+    let update = $.ajax({url: "/external/bst_api/ddr_update",
+        type: "PATCH"});
+
+    update.done(function() {
+        processing.innerText = "Done!"
+    })
 }
 
 function refreshProfile() {
@@ -28,14 +24,10 @@ function refreshProfile() {
     processing.appendChild(document.createTextNode('processing ...'));
     btn.parentNode.insertBefore(processing, btn);
 
-    $.ajax({url: "/external/bst_api/ddr_refresh",
-        type: "PATCH",
-        dataType: "json",
-        success: function(result, textStatus, xhr){
-        if (xhr.status == 200) {
-            processing.innerText = "Done!"
-        } else {
-            processing.innerText = this.response
-        }
-        }});
+    let update = $.ajax({url: "/external/bst_api/ddr_refresh",
+        type: "PATCH"});
+
+    update.done(function() {
+        processing.innerText = "Done!"
+    })
 }
