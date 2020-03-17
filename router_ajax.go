@@ -34,7 +34,7 @@ func EagateLoginStatusGet(rw http.ResponseWriter, r *http.Request) {
             <div class="form-row align-items-center">
                 <input id="eagate-username" class="form-control form-control-sm" type="text" placeholder="Eagate Username">
                 <input id="eagate-password" class="form-control form-control-sm" type="password" placeholder="Eagate Password">
-                <button class="btn btn-primary" type="submit" onClick="eagateLogin()">Login</button>
+                <button type="button" class="btn btn-primary" onClick="eagateLogin()">Login</button>
             </div>
         </form>
 		</a>`

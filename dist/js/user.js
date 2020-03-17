@@ -25,18 +25,20 @@ function eagateLogin() {
         dataType   : "json"
         });
 
-    loginReq.done(function(data) {
-        console.log("data")
+    loginReq.done(function() {
+        location.reload()
     })
 }
 
 function eagateLogout(user) {
-    $.ajax({url: "/external/bst_api/eagate_logout",
+    let logoutReq = $.ajax({url: "/external/bst_api/eagate_logout",
         type: "POST",
         data: JSON.stringify({username: user}),
         contentType: "application/json; charset=utf-8",
-        dataType   : "json",
-        success: function(result){
-            location.reload()
-        }});
+        dataType   : "json"
+    });
+
+    logoutReq.done(function() {
+        location.reload()
+    })
 }
