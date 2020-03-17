@@ -25,9 +25,8 @@ function eagateLogin() {
         dataType   : "json"
         });
 
-    loginReq.done(function() {
-        console.log("reload")
-        location.reload()
+    loginReq.done(function(data) {
+        console.log("data")
     })
 }
 
