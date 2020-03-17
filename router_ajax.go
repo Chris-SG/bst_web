@@ -46,9 +46,20 @@ func EagateLoginStatusGet(rw http.ResponseWriter, r *http.Request) {
 	var text []byte
 	text = append(text, []byte(`<a id="eagate-login-state">`)...)
 	for _, user := range users {
+		var username string
+		session, _ := Store.Get(r, "auth-session")
+
+		profileMap, ok := session.Values["profile"].(map[string]interface{})
+		if ok {
+			username, ok = profileMap["name"].(string)
+			if !ok {
+				username = "No Nickname"
+			}
+		}
+
 		userText := fmt.Sprintf(`
         <p>Currently linked to %s.</p>
-        <button type="button" class="btn btn-primary" onClick="eagateLogout('%s')">Unlink</button>`, user.Username, user.Username)
+        <button type="button" class="btn btn-primary" onClick="eagateLogout('%s')">Unlink</button>`, user.Username, username)
 		text = append(text, []byte(userText)...)
 	}
 	text = append(text, []byte(`</a>`)...)
