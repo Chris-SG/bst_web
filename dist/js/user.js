@@ -10,26 +10,6 @@ function eagateLogin() {
     let p = document.getElementById("eagate-password");
     let loginForm = document.getElementById('eagate-login-state');
 
-    let xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        /*if (this.readyState == 4 && this.status == 200) {
-            loginForm.parentNode.textContent = '';
-            location.reload()
-        } else if (this.readyState == 4) {
-            let processing = document.getElementById('eagate-login-processing');
-            processing.parentNode.removeChild(processing);
-
-            u.value = '';
-            p.value = '';
-
-            loginForm.style.display = 'initial';
-        }*/
-        if (this.readyState == 4) {
-            console.log(xhttp.response)
-            location.reload()
-        }
-    };
-
     loginForm.style.display = 'none';
 
     let processing = document.createElement('span');
@@ -37,21 +17,23 @@ function eagateLogin() {
     processing.appendChild(document.createTextNode('processing ...'));
     loginForm.parentNode.insertBefore(processing, loginForm);
 
-    xhttp.open("POST", "/external/bst_api/eagate_login", false);
-    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    let reqBody = JSON.stringify(JSON.parse(`{ "username": "${u.value}", "password": "${p.value}" }`));
-    xhttp.send(reqBody);
+    $.ajax({url: "/external/bst_api/eagate_login",
+        type: "POST",
+        data: JSON.stringify({username: u.value, password: p.value}),
+        contentType: "application/json; charset=utf-8",
+        dataType   : "json",
+        success: function(result){
+            location.reload()
+        }});
 }
 
 function eagateLogout(user) {
-    let xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4) {
+    $.ajax({url: "/external/bst_api/eagate_logout",
+        type: "POST",
+        data: JSON.stringify({username: user}),
+        contentType: "application/json; charset=utf-8",
+        dataType   : "json",
+        success: function(result){
             location.reload()
-        }
-    };
-    xhttp.open("POST", "/external/bst_api/eagate_logout", true);
-    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    let reqBody = JSON.stringify(JSON.parse(`{ "username": "${user}" }`));
-    xhttp.send(reqBody);
+        }});
 }
