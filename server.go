@@ -83,7 +83,7 @@ func main() {
 		Handler:           r,
 		Addr:		":" + servePort,
 		ReadTimeout: 15 * time.Second,
-		WriteTimeout: 15 * time.Second,
+		WriteTimeout: 90 * time.Second,
 		TLSConfig: &tls.Config{
 			GetCertificate: certManager.GetCertificate,
 		},
