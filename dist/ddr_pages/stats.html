@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {{ .CommonSheets}}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+    <meta charset="UTF-8">
+    <title>DDR Stats</title>
+</head>
+<body>
+{{ .Header}}
+<div class="main">
+    <a>DDR Stats!</a>
+    <div class="ddr-stats" id="ddr-stats-loc">
+
+    </div>
+</div>
+{{ .Footer}}
+{{ .CommonScripts}}
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="/js/ddr.js"></script>
+<script>
+    window.onload = loadStatsTable;
+</script>
+</body>
+</html>

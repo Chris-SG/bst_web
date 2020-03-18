@@ -42,6 +42,9 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 		negroni.Wrap(http.HandlerFunc(DdrUpdatePatch)))).Methods(http.MethodPatch)
 	bstApiRouter.Path("/ddr_refresh").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(DdrRefreshPatch)))).Methods(http.MethodPatch)
+	bstApiRouter.Path("/ddr_stats").Handler(negroni.New(
+		negroni.Wrap(http.HandlerFunc(DdrStatsGet)))).Methods(http.MethodGet)
+
 
 	return bstApiRouter
 }
@@ -382,6 +385,128 @@ func DdrRefreshPatchImpl(token string) (status bst_models.Status) {
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	json.Unmarshal(body, &status)
+
+	return
+}
+
+func DdrStatsGet(rw http.ResponseWriter, r *http.Request) {
+	token, err := TokenForRequest(r)
+	if err != nil {
+		status := bst_models.Status{
+			Status:  "bad",
+			Message: err.Error(),
+		}
+
+		bytes, _ := json.Marshal(status)
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write(bytes)
+		return
+	}
+
+	stats := DdrStatsGetImpl(token)
+
+	rw.Write([]byte(stats))
+	return
+}
+
+func DdrStatsGetImpl(token string) (stats string) {
+	uri, _ := url.Parse("https://" + bstApi + bstApiBase + "ddr/songs/scores/extended")
+
+	req := &http.Request{
+		Method:           http.MethodGet,
+		URL:              uri,
+		Header:			  make(map[string][]string),
+	}
+	req.Header.Add("Authorization", "Bearer " + token)
+
+	res, err := bstApiClient.Do(req)
+	if err != nil {
+		stats = "<a>API Error</a>"
+		return
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+
+	statsFromServer := make([]bst_models.DdrStatisticsTable, 0)
+
+	err = json.Unmarshal(body, &statsFromServer)
+	if err != nil {
+		stats = "<a>API Error</a>"
+		return
+	}
+
+stats = `<table id="stats" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>Level</th>
+                <th>Song Name</th>
+                <th>Artist</th>
+                <th>Mode</th>
+                <th>Difficulty</th>
+                <th>Clear Lamp</th>
+                <th>Rank</th>
+                <th>Score</th>
+                <th>Play Count</th>
+                <th>Clear Count</th>
+                <th>Max Combo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Tiger Nixon</td>
+                <td>System Architect</td>
+                <td>Edinburgh</td>
+                <td>61</td>
+                <td>2011/04/25</td>
+                <td>$320,800</td>
+            </tr>`
+	for _, stat := range statsFromServer {
+		stats = fmt.Sprintf(`%s
+            <tr>
+                <td>%d</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%d</td>
+                <td>%d</td>
+                <td>%d</td>
+                <td>%d</td>
+            </tr>`,
+            stats,
+            stat.Level,
+            stat.Title,
+            stat.Artist,
+            stat.Mode,
+            stat.Difficulty,
+            stat.Lamp,
+            stat.Rank,
+            stat.Score,
+            stat.PlayCount,
+            stat.ClearCount,
+            stat.MaxCombo)
+	}
+	stats = fmt.Sprintf(`%s
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>Level</th>
+                <th>Song Name</th>
+                <th>Artist</th>
+                <th>Mode</th>
+                <th>Difficulty</th>
+                <th>Clear Lamp</th>
+                <th>Rank</th>
+                <th>Score</th>
+                <th>Play Count</th>
+                <th>Clear Count</th>
+                <th>Max Combo</th>
+            </tr>
+        </tfoot>
+    </table>`, stats)
 
 	return
 }
