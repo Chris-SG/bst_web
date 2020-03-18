@@ -34,11 +34,11 @@ function refreshProfile() {
 }
 
 function loadStatsTable() {
-    $("#ddr-stats-loc").html = "<a>Loading table - please wait</a>";
+    $("#ddr-stats-loc").html("<a>Loading table - please wait</a>");
     let table = $.ajax({url: "/external/bst_api/ddr_stats"});
 
     table.done(function(data) {
-        $("#ddr-stats-loc").html = data;
+        $("#ddr-stats-loc").html(data);
 
         $('#stats').DataTable();
     })
