@@ -1,2 +1,10 @@
+a.level-filter.enable {
+    color: black;
+}
+
+a.level-filter.disable {
+    color: dimgrey;
+}
+
 @import '/css/header.css';
 @import '/css/footer.css';

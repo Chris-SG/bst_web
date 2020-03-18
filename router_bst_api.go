@@ -436,7 +436,47 @@ func DdrStatsGetImpl(token string) (stats string) {
 		return
 	}
 
-stats = `<table id="stats" class="display" style="width:100%">
+stats = `<table border="0" cellspacing="5" cellpadding="5">
+		<thead>
+			<tr>
+				<th>Levels</th>
+				<th>Mode</th>
+				<th>Difficulty</th>
+				<th>Lamp</th>
+			</tr>
+		</thead>
+        <tbody><tr>
+            <td><a class="enabled level-filter" id="level-filter-1"> 1</a> <a class="enabled level-filter" id="level-filter-2"> 2</a> <a class="enabled level-filter" id="level-filter-3"> 3</a> <a class="enabled level-filter" id="level-filter-4"> 4</a> <a class="enabled level-filter" id="level-filter-5"> 5</a></td>
+			<td><input type="checkbox" id="single-filter" name="single-filter" checked> SINGLE</td>
+			<td><input type="checkbox" id="beginner-filter" name="beginner-filter" checked> BEGINNER</td>
+			<td><input type="checkbox" id="fail-filter" name="fail-filter" checked> FAIL</td>
+        </tr><tr>
+            <td><a class="enabled level-filter" id="level-filter-6"> 6</a> <a class="enabled level-filter" id="level-filter-7"> 7</a> <a class="enabled level-filter" id="level-filter-8"> 8</a> <a class="enabled level-filter" id="level-filter-9"> 9</a> <a class="enabled level-filter" id="level-filter-10">10</a></td>
+			<td><input type="checkbox" id="double-filter" name="double-filter" checked> DOUBLE</td>
+			<td><input type="checkbox" id="basic-filter" name="basic-filter" checked> BASIC</td>
+			<td><input type="checkbox" id="clear-filter" name="clear-filter" checked> CLEAR</td>
+        </tr><tr>
+            <td><a class="enabled level-filter" id="level-filter-11">11</a> <a class="enabled level-filter" id="level-filter-12">12</a> <a class="enabled level-filter" id="level-filter-13">13</a> <a class="enabled level-filter" id="level-filter-14">14</a> <a class="enabled level-filter" id="level-filter-15">15</a></td>
+			<td></td>
+			<td><input type="checkbox" id="standard-filter" name="standard-filter" checked> STANDARD </td>
+			<td><input type="checkbox" id="good-filter" name="good-filter" checked> GOOD FC</td>
+        </tr><tr>
+            <td><a class="enabled level-filter" id="level-filter-16">16</a> <a class="enabled level-filter" id="level-filter-17">17</a> <a class="enabled level-filter" id="level-filter-18">18</a> <a class="enabled level-filter" id="level-filter-19">19</a></td>
+			<td></td>
+			<td><input type="checkbox" id="expert-filter" name="expert-filter" checked> EXPERT</td>
+			<td><input type="checkbox" id="great-filter" name="great-filter" checked> GREAT FC</td>
+        </tr><tr>
+            <td><a id="level-filter-all-enable">All</a></td>
+			<td></td>
+			<td><input type="checkbox" id="challenge-filter" name="challenge-filter" checked> CHALLENGE</td>
+			<td><input type="checkbox" id="perfect-filter" name="perfect-filter" checked> PERFECT FC</td>
+        </tr><tr>
+            <td><a id="level-filter-all-disable">None</a></td>
+			<td></td>
+			<td></td>
+			<td><input type="checkbox" id="marvellous-filter" name="marvellous-filter" checked> MARVELLOUS FC</td>
+        </tr>
+    </tbody></table><table id="stats" class="display" style="width:100%">
         <thead>
             <tr>
                 <th>Level</th>
