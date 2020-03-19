@@ -442,7 +442,7 @@ stats = `<button class="btn btn-primary" type="button" data-toggle="collapse" da
 </p>
 <div class="collapse" id="collapseFilter">
   <div class="card card-body">
-	<div class="container">
+	<div class="container col-4">
 		<div class="row">
 			<div class="container">
 				<div class="row">Levels</div>
@@ -483,15 +483,15 @@ stats = `<button class="btn btn-primary" type="button" data-toggle="collapse" da
 				</div>
 			</div>
 		</div>
-		<div class="row">
-		</div>
-		<div class="row">
-		</div>
-		<div class="row">
-		</div>
-		<div class="row">
-		</div>
 	</div>
+		<div class="container col-4">
+		</div>
+		<div class="container col-2">
+		</div>
+		<div class="container col-2">
+		</div>
+		<div class="container col-8">
+		</div>
 	<table border="0" cellspacing="5" cellpadding="5">
 		<thead>
 			<tr>
