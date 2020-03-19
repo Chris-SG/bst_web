@@ -61,7 +61,7 @@ func main() {
 	/*r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
 		negroni.HandlerFunc(SetContentType("application/javascript")),
 		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))*/
-	r.Path("/{path:.js").Handler(commonMiddleware.With(
+	r.Path("/{path:.*\\.js$}").Handler(commonMiddleware.With(
 		negroni.HandlerFunc(SetContentType("application/javascript")),
 		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
 
