@@ -475,6 +475,11 @@ stats = `<table border="0" cellspacing="5" cellpadding="5">
 			<td></td>
 			<td></td>
 			<td><input type="checkbox" id="marvellous-filter" name="marvellous-filter" checked> MARVELLOUS FC</td>
+        </tr><tr>
+            <td></td>
+			<td></td>
+			<td></td>
+			<td><input type="checkbox" id="unplayed-filter" name="unplayed-filter" checked> NOT PLAYED</td>
         </tr>
     </tbody></table><table id="stats" class="display" style="width:100%">
         <thead>

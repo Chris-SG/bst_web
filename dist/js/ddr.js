@@ -88,8 +88,46 @@ function addStatsTableFiltering(statsDataTable) {
 
     $.fn.dataTable.ext.search.push(
         function( settings, data, dataIndex ) {
-            let mode = data[3].toLowerCase()
-            return $('#' + mode + '-filter')[0].checked
+            let mode = data[3].toLowerCase();
+            return $('#' + mode + '-filter')[0].checked;
+        }
+    );
+
+    $('#beginner-filter, #basic-filter, #standard-filter, #expert-filter, #challenge-filter').change( function() {
+        statsDataTable.draw();
+    } );
+
+    $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+            let diff = data[4].toLowerCase();
+            return $('#' + diff + '-filter')[0].checked;
+        }
+    );
+
+    $('#fail-filter, #clear-filter, #good-filter, #great-filter, #perfect-filter, #marvellous-filter, #unplayed-filter').change( function() {
+        statsDataTable.draw();
+    } );
+
+    let lampMap = new Map();
+    lampMap.set("マーベラスフルコンボ", "marvellous");
+    lampMap.set("パーフェクトフルコンボ", "perfect");
+    lampMap.set("グレートフルコンボ", "great");
+    lampMap.set("グッドフルコンボ", "good");
+
+    $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+            let lamp = data[5].toLowerCase();
+            if(lampMap.has(lamp)) {
+                return $('#' + lamp + '-filter')[0].checked;
+            }
+            if(lamp === '----') {
+                if(data[6].toLowerCase() === 'e') {
+                    return $('#fail-filter')[0].checked;
+                } else {
+                    return $('#clear-filter')[0].checked;
+                }
+            }
+            return $('#unplayed-filter')[0].checked;
         }
     );
 }

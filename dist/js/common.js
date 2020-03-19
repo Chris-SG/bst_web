@@ -1,8 +1,8 @@
 function GetApiStatus() {
     $.ajax({url: "/external/bst_api/status", dataType: "json", success: function(result){
         console.log(result);
-        $(".footer a")[0].setAttribute("class", "bst-api-status-" + result.api);
-        $(".footer a").text("BST API STATUS: " + result.api);
+        $("#footer a")[0].setAttribute("class", "bst-api-status-" + result.api);
+        $("#footer a").text("BST API STATUS: " + result.api);
     }});
 }
 GetApiStatus();

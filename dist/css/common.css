@@ -1,13 +1,13 @@
 section#main {
-    margin-top: 120px;
+    margin-top: 60px;
 }
 
-a.level-filter.enable {
+a.level-filter.enabled {
     color: black;
 }
 
-a.level-filter.disable {
-    color: dimgrey;
+a.level-filter.disabled {
+    color: lightgrey;
 }
 
 @import '/css/header.css';
