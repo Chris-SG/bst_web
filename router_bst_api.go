@@ -443,8 +443,8 @@ stats = `<button class="btn btn-primary" type="button" data-toggle="collapse" da
 <div class="collapse" id="collapseFilter">
   <div class="card card-body">
 	<div class="container">
-		<div class="row col-4">
-			<div class="container">
+		<div class="row">
+			<div class="container col-4">
 				<div class="row">Levels</div>
 				<div class="row">
 					<div class="col enabled level-filter" id="level-filter-1">1</div>
@@ -482,18 +482,14 @@ stats = `<button class="btn btn-primary" type="button" data-toggle="collapse" da
 					<div class="col"></div>
 				</div>
 			</div>
-		</div>
-		<div class="row col-4">
-			<div class="container">
+			<div class="container col-4">
 				<div class="row">Mode</div>
 				<div class="row">
 					<span><input type="checkbox" id="single-filter" name="single-filter" checked> SINGLE</span>
           		    <span><input type="checkbox" id="double-filter" name="double-filter" checked> DOUBLE</span>
 				</div>
 			</div>
-		</div>
-		<div class="row col-2">
-			<div class="container">
+			<div class="container col-6">
 				<div class="row">Difficulty</div>
 				<div class="row">
 					<span><input type="checkbox" id="beginner-filter" name="beginner-filter" checked> BEGINNER</span>
@@ -505,10 +501,8 @@ stats = `<button class="btn btn-primary" type="button" data-toggle="collapse" da
 					<span><input type="checkbox" id="challenge-filter" name="challenge-filter" checked> CHALLENGE</span>
 				</div>
 			</div>
-		</div>
-		<div class="row col-2">
-			<div class="container">
-				<div class="row">Mode</div>
+			<div class="container col-8">
+				<div class="row">Lamp</div>
 				<div class="row">
 					<span><input type="checkbox" id="unplayed-filter" name="unplayed-filter" checked> NOT PLAYED</span>
 					<span><input type="checkbox" id="fail-filter" name="fail-filter" checked> FAIL</span>
