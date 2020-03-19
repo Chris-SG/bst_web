@@ -1,14 +1,14 @@
+@import '/css/header.css';
+@import '/css/footer.css';
+
 section#main {
     margin-top: 60px;
 }
 
-a.level-filter.enabled {
+a.level-filter.enable {
     color: black;
 }
 
-a.level-filter.disabled {
-    color: lightgrey;
+a.level-filter.disable {
+    color: dimgrey;
 }
-
-@import '/css/header.css';
-@import '/css/footer.css';

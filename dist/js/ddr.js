@@ -120,7 +120,7 @@ function addStatsTableFiltering(statsDataTable) {
             if(lampMap.has(lamp)) {
                 return $('#' + lampMap.get(lamp) + '-filter')[0].checked;
             }
-            if(lamp === '----') {
+            if(lamp === '---') {
                 if(data[6].toLowerCase() === 'e') {
                     return $('#fail-filter')[0].checked;
                 } else {
