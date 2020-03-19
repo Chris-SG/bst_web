@@ -41,9 +41,6 @@ func main() {
 
 	r.NotFoundHandler = http.HandlerFunc(NotFoundMiddleware)
 
-	r.Path("/whoami").Handler(commonMiddleware.With(
-		negroni.Wrap(http.HandlerFunc(WhoAmI))))
-
 	// SUB-ROUTERS
 	r.PathPrefix("/external").Handler(commonMiddleware.With(
 		negroni.Wrap(CreateExternalRouters("", nil))))
@@ -56,6 +53,9 @@ func main() {
 		negroni.Wrap(DdrRouter())))
 
 	AttachAuthRoutes(r)
+
+	r.Path("/whoami").Handler(commonMiddleware.With(
+		negroni.Wrap(http.HandlerFunc(WhoAmI)))).Methods(http.MethodGet)
 
 	// FILESERVERS
 	r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
