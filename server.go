@@ -58,7 +58,10 @@ func main() {
 		negroni.Wrap(http.HandlerFunc(WhoAmI)))).Methods(http.MethodGet)
 
 	// FILESERVERS
-	r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
+	/*r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
+		negroni.HandlerFunc(SetContentType("application/javascript")),
+		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))*/
+	r.Path("/{path:.js").Handler(commonMiddleware.With(
 		negroni.HandlerFunc(SetContentType("application/javascript")),
 		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
 
