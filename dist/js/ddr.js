@@ -93,13 +93,14 @@ function addStatsTableFiltering(statsDataTable) {
         }
     );
 
-    $('#beginner-filter, #basic-filter, #standard-filter, #expert-filter, #challenge-filter').change( function() {
+    $('#beginner-filter, #basic-filter, #difficult-filter, #expert-filter, #challenge-filter').change( function() {
         statsDataTable.draw();
     } );
 
     $.fn.dataTable.ext.search.push(
         function( settings, data, dataIndex ) {
             let diff = data[4].toLowerCase();
+            console.log(data[1] + ":" + data[4]);
             return $('#' + diff + '-filter')[0].checked;
         }
     );

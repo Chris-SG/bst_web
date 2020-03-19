@@ -458,7 +458,7 @@ stats = `<table border="0" cellspacing="5" cellpadding="5">
         </tr><tr>
             <td><a class="enabled level-filter" id="level-filter-11">11</a> <a class="enabled level-filter" id="level-filter-12">12</a> <a class="enabled level-filter" id="level-filter-13">13</a> <a class="enabled level-filter" id="level-filter-14">14</a> <a class="enabled level-filter" id="level-filter-15">15</a></td>
 			<td></td>
-			<td><input type="checkbox" id="standard-filter" name="standard-filter" checked> STANDARD </td>
+			<td><input type="checkbox" id="difficult-filter" name="difficult-filter" checked> DIFFICULT </td>
 			<td><input type="checkbox" id="good-filter" name="good-filter" checked> GOOD FC</td>
         </tr><tr>
             <td><a class="enabled level-filter" id="level-filter-16">16</a> <a class="enabled level-filter" id="level-filter-17">17</a> <a class="enabled level-filter" id="level-filter-18">18</a> <a class="enabled level-filter" id="level-filter-19">19</a></td>
