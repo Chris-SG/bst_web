@@ -48,7 +48,7 @@ function loadStatsTable() {
 
 function addStatsTableFiltering(statsDataTable) {
 
-    $("a.level-filter").on("click", function() {
+    $("div.level-filter").on("click", function() {
         if($(this).hasClass("enabled")) {
             $(this).addClass("disabled");
             $(this).removeClass("enabled");
@@ -59,7 +59,7 @@ function addStatsTableFiltering(statsDataTable) {
         statsDataTable.draw();
     });
 
-    $("a#level-filter-all-enable").on("click", function() {
+    $("div#level-filter-all-enable").on("click", function() {
         $("a.level-filter").each(function() {
             $(this).addClass("enabled");
             $(this).removeClass("disabled");
@@ -67,7 +67,7 @@ function addStatsTableFiltering(statsDataTable) {
         statsDataTable.draw();
     });
 
-    $("a#level-filter-all-disable").on("click", function() {
+    $("div#level-filter-all-disable").on("click", function() {
         $("a.level-filter").each(function() {
             $(this).addClass("disabled");
             $(this).removeClass("enabled");
