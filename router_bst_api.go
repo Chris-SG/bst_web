@@ -442,8 +442,8 @@ stats = `<button class="btn btn-primary" type="button" data-toggle="collapse" da
 </p>
 <div class="collapse" id="collapseFilter">
   <div class="card card-body">
-	<div class="container col-4">
-		<div class="row">
+	<div class="container">
+		<div class="row col-4">
 			<div class="container">
 				<div class="row">Levels</div>
 				<div class="row">
@@ -483,53 +483,46 @@ stats = `<button class="btn btn-primary" type="button" data-toggle="collapse" da
 				</div>
 			</div>
 		</div>
+		<div class="row col-4">
+			<div class="container">
+				<div class="row">Mode</div>
+				<div class="row">
+					<span><input type="checkbox" id="single-filter" name="single-filter" checked> SINGLE</span>
+          		    <span><input type="checkbox" id="double-filter" name="double-filter" checked> DOUBLE</span>
+				</div>
+			</div>
+		</div>
+		<div class="row col-2">
+			<div class="container">
+				<div class="row">Difficulty</div>
+				<div class="row">
+					<span><input type="checkbox" id="beginner-filter" name="beginner-filter" checked> BEGINNER</span>
+					<span><input type="checkbox" id="basic-filter" name="basic-filter" checked> BASIC</span>
+					<span><input type="checkbox" id="difficult-filter" name="difficult-filter" checked> DIFFICULT </span>
+				</div>
+				<div class="row">
+					<span><input type="checkbox" id="expert-filter" name="expert-filter" checked> EXPERT</span>
+					<span><input type="checkbox" id="challenge-filter" name="challenge-filter" checked> CHALLENGE</span>
+				</div>
+			</div>
+		</div>
+		<div class="row col-2">
+			<div class="container">
+				<div class="row">Mode</div>
+				<div class="row">
+					<span><input type="checkbox" id="unplayed-filter" name="unplayed-filter" checked> NOT PLAYED</span>
+					<span><input type="checkbox" id="fail-filter" name="fail-filter" checked> FAIL</span>
+					<span><input type="checkbox" id="clear-filter" name="clear-filter" checked> CLEAR</span>
+				</div>
+				<div class="row">
+					<span><input type="checkbox" id="good-filter" name="good-filter" checked> GOOD FC</span>
+					<span><input type="checkbox" id="great-filter" name="great-filter" checked> GREAT FC</span>
+					<span><input type="checkbox" id="perfect-filter" name="perfect-filter" checked> PERFECT FC</span>
+					<span><input type="checkbox" id="marvellous-filter" name="marvellous-filter" checked> MARVELLOUS FC</span>
+				</div>
+			</div>
+		</div>
 	</div>
-		<div class="container col-4">
-		</div>
-		<div class="container col-2">
-		</div>
-		<div class="container col-2">
-		</div>
-		<div class="container col-8">
-		</div>
-	<table border="0" cellspacing="5" cellpadding="5">
-		<thead>
-			<tr>
-				<th>Mode</th>
-				<th>Difficulty</th>
-				<th>Lamp</th>
-			</tr>
-		</thead>
-        <tbody><tr>
-            <td><input type="checkbox" id="single-filter" name="single-filter" checked> SINGLE</td>
-			<td><input type="checkbox" id="beginner-filter" name="beginner-filter" checked> BEGINNER</td>
-			<td><input type="checkbox" id="fail-filter" name="fail-filter" checked> FAIL</td>
-        </tr><tr>
-            <td><input type="checkbox" id="double-filter" name="double-filter" checked> DOUBLE</td>
-			<td><input type="checkbox" id="basic-filter" name="basic-filter" checked> BASIC</td>
-			<td><input type="checkbox" id="clear-filter" name="clear-filter" checked> CLEAR</td>
-        </tr><tr>
-            <td></td>
-			<td><input type="checkbox" id="difficult-filter" name="difficult-filter" checked> DIFFICULT </td>
-			<td><input type="checkbox" id="good-filter" name="good-filter" checked> GOOD FC</td>
-        </tr><tr>
-            <td></td>
-			<td><input type="checkbox" id="expert-filter" name="expert-filter" checked> EXPERT</td>
-			<td><input type="checkbox" id="great-filter" name="great-filter" checked> GREAT FC</td>
-        </tr><tr>
-            <td></td>
-			<td><input type="checkbox" id="challenge-filter" name="challenge-filter" checked> CHALLENGE</td>
-			<td><input type="checkbox" id="perfect-filter" name="perfect-filter" checked> PERFECT FC</td>
-        </tr><tr>
-            <td></td>
-			<td></td>
-			<td><input type="checkbox" id="marvellous-filter" name="marvellous-filter" checked> MARVELLOUS FC</td>
-        </tr><tr>
-			<td></td>
-			<td></td>
-			<td><input type="checkbox" id="unplayed-filter" name="unplayed-filter" checked> NOT PLAYED</td>
-        </tr>
-    </tbody></table>
 	</div>
 	</div>
 	<table id="stats" class="display" style="width:100%">

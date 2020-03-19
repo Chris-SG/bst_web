@@ -60,7 +60,7 @@ function addStatsTableFiltering(statsDataTable) {
     });
 
     $("div#level-filter-all-enable").on("click", function() {
-        $("a.level-filter").each(function() {
+        $("div.level-filter").each(function() {
             $(this).addClass("enabled");
             $(this).removeClass("disabled");
         });
@@ -68,7 +68,7 @@ function addStatsTableFiltering(statsDataTable) {
     });
 
     $("div#level-filter-all-disable").on("click", function() {
-        $("a.level-filter").each(function() {
+        $("div.level-filter").each(function() {
             $(this).addClass("disabled");
             $(this).removeClass("enabled");
         });
