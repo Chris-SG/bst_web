@@ -63,14 +63,16 @@ function addStatsTableFiltering(statsDataTable) {
         $("a.level-filter").each(function() {
             $(this).addClass("enabled");
             $(this).removeClass("disabled");
-        })
+        });
+        statsDataTable.draw();
     });
 
     $("a#level-filter-all-disable").on("click", function() {
         $("a.level-filter").each(function() {
             $(this).addClass("disabled");
             $(this).removeClass("enabled");
-        })
+        });
+        statsDataTable.draw();
     });
 
     $.fn.dataTable.ext.search.push(
@@ -83,6 +85,7 @@ function addStatsTableFiltering(statsDataTable) {
     $('#single-filter, #double-filter').change( function() {
         statsDataTable.draw();
     } );
+
     $.fn.dataTable.ext.search.push(
         function( settings, data, dataIndex ) {
             let mode = data[3].toLowerCase()

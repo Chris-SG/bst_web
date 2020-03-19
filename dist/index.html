@@ -7,11 +7,11 @@
 </head>
 <body>
 {{ .Header}}
-<div class="container-fluid" style="margin-top:60px">
+<section id="main" class="container-fluid">
     <button onclick="addToA('abc')">abc</button>
     <a id="abc"></a>
     <button onclick="clearVals()">Clear</button>
-</div>
+</section>
 {{ .Footer}}
 {{ .CommonScripts}}
 <script src='/js/home.js'></script>

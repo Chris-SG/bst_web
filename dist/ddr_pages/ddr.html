@@ -7,7 +7,7 @@
 </head>
 <body>
 {{ .Header}}
-<div class="main">
+<section id="main">
     <a>DDR!</a>
     <div class="ddr-player">
         <a id="ddr-player-details">
@@ -15,7 +15,7 @@
             <button id="ddr-player-details-refresh" class="btn btn-primary" type="submit" onClick="refreshProfile()">Refresh</button>
         </a>
     </div>
-</div>
+</section>
 {{ .Footer}}
 {{ .CommonScripts}}
 <script src="/js/ddr.js"></script>

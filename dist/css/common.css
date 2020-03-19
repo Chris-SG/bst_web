@@ -1,3 +1,7 @@
+section#main {
+    margin-top: 120px;
+}
+
 a.level-filter.enable {
     color: black;
 }
