@@ -100,7 +100,6 @@ function addStatsTableFiltering(statsDataTable) {
     $.fn.dataTable.ext.search.push(
         function( settings, data, dataIndex ) {
             let diff = data[4].toLowerCase();
-            console.log(data[1] + ":" + data[4]);
             return $('#' + diff + '-filter')[0].checked;
         }
     );
@@ -119,7 +118,7 @@ function addStatsTableFiltering(statsDataTable) {
         function( settings, data, dataIndex ) {
             let lamp = data[5].toLowerCase();
             if(lampMap.has(lamp)) {
-                return $('#' + lamp + '-filter')[0].checked;
+                return $('#' + lampMap.get(lamp) + '-filter')[0].checked;
             }
             if(lamp === '----') {
                 if(data[6].toLowerCase() === 'e') {
