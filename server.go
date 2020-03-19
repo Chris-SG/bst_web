@@ -42,7 +42,7 @@ func main() {
 	r.NotFoundHandler = http.HandlerFunc(NotFoundMiddleware)
 
 	r.Path("/whoami").Handler(commonMiddleware.With(
-		negroni.Wrap(WhoAmI)));
+		negroni.Wrap(http.HandlerFunc(WhoAmI))))
 
 	// SUB-ROUTERS
 	r.PathPrefix("/external").Handler(commonMiddleware.With(
