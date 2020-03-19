@@ -41,6 +41,9 @@ func main() {
 
 	r.NotFoundHandler = http.HandlerFunc(NotFoundMiddleware)
 
+	r.Path("/whoami").Handler(commonMiddleware.With(
+		negroni.Wrap(WhoAmI)));
+
 	// SUB-ROUTERS
 	r.PathPrefix("/external").Handler(commonMiddleware.With(
 		negroni.Wrap(CreateExternalRouters("", nil))))
@@ -184,4 +187,28 @@ func OpenResource(path string, resource string) func(rw http.ResponseWriter, r *
 		fmt.Println("serving resource")
 		http.ServeFile(rw, r, path + resource)
 	}
+}
+
+func WhoAmI(rw http.ResponseWriter, r *http.Request) {
+	session, err := Store.Get(r, "auth-session")
+	if err != nil {
+		rw.WriteHeader(http.StatusOK)
+		rw.Write([]byte(""))
+	}
+
+	if session != nil {
+		if _, ok := session.Values["access_token"]; ok {
+			var nickname string
+			profileMap, ok := session.Values["profile"].(map[string]interface{})
+			if ok {
+				nickname, ok = profileMap["nickname"].(string)
+				if ok {
+					rw.WriteHeader(http.StatusOK)
+					rw.Write([]byte(nickname))
+				}
+			}
+		}
+	}
+	rw.WriteHeader(http.StatusOK)
+	rw.Write([]byte(""))
 }
