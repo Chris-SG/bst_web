@@ -436,7 +436,48 @@ func DdrStatsGetImpl(token string) (stats string) {
 		return
 	}
 
-stats = `<table border="0" cellspacing="5" cellpadding="5">
+stats = `<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
+    Filtering
+  </button>
+</p>
+<div class="collapse" id="collapseFilter">
+  <div class="card card-body">
+	<div class="container">
+		<div class="row">
+			<div class="container">
+				<div class="row">Levels</div>
+				<div class="row">
+					<div class="col"><a class="enabled level-filter" id="level-filter-1"> 1</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-2"> 2</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-3"> 3</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-4"> 4</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-5"> 5</a></div>
+				</div>
+				<div class="row">
+					<div class="col"><a class="enabled level-filter" id="level-filter-6"> 6</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-7"> 7</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-8"> 8</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-9"> 9</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-10"> 10</a></div>
+				</div>
+				<div class="row">
+					<div class="col"><a class="enabled level-filter" id="level-filter-11"> 11</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-12"> 12</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-13"> 13</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-14"> 14</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-15"> 15</a></div>
+				</div>
+				<div class="row">
+					<div class="col"><a class="enabled level-filter" id="level-filter-16"> 16</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-17"> 17</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-18"> 18</a></div>
+					<div class="col"><a class="enabled level-filter" id="level-filter-19"> 19</a></div>
+					<div class="col"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<table border="0" cellspacing="5" cellpadding="5">
 		<thead>
 			<tr>
 				<th>Levels</th>
@@ -481,7 +522,10 @@ stats = `<table border="0" cellspacing="5" cellpadding="5">
 			<td></td>
 			<td><input type="checkbox" id="unplayed-filter" name="unplayed-filter" checked> NOT PLAYED</td>
         </tr>
-    </tbody></table><table id="stats" class="display" style="width:100%">
+    </tbody></table>
+	</div>
+	</div>
+	<table id="stats" class="display" style="width:100%">
         <thead>
             <tr>
                 <th>Level</th>
