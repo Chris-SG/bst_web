@@ -194,6 +194,7 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		rw.WriteHeader(http.StatusOK)
 		rw.Write([]byte(""))
+		return
 	}
 
 	if session != nil {
@@ -205,10 +206,12 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 				if ok {
 					rw.WriteHeader(http.StatusOK)
 					rw.Write([]byte(nickname))
+					return
 				}
 			}
 		}
 	}
 	rw.WriteHeader(http.StatusOK)
 	rw.Write([]byte(""))
+	return
 }
