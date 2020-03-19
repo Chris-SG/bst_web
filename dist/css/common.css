@@ -2,10 +2,10 @@ section#main {
     margin-top: 60px;
 }
 
-a.level-filter.enable {
-    color: black;
+a.level-filter.enabled {
+    color: #004400;
 }
 
-a.level-filter.disable {
-    color: dimgrey;
+a.level-filter.disabled {
+    color: #440000;
 }
