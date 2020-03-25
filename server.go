@@ -6,11 +6,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"golang.org/x/crypto/acme/autocert"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
-	"text/template"
 	"time"
 )
 
@@ -41,6 +39,10 @@ func main() {
 
 	r.NotFoundHandler = http.HandlerFunc(NotFoundMiddleware)
 
+	r.Path("/{path:.*\\.js$}").Handler(commonMiddleware.With(
+		negroni.HandlerFunc(SetContentType("application/javascript")),
+		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
+
 	// SUB-ROUTERS
 	r.PathPrefix("/external").Handler(commonMiddleware.With(
 		negroni.Wrap(CreateExternalRouters("", nil))))
@@ -57,13 +59,17 @@ func main() {
 	r.Path("/whoami").Handler(commonMiddleware.With(
 		negroni.Wrap(http.HandlerFunc(WhoAmI)))).Methods(http.MethodGet)
 
+	r.Path("/token").Handler(commonMiddleware.With(
+		negroni.Wrap(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			session, _ := Store.Get(r, "auth-session")
+			rw.WriteHeader(http.StatusOK)
+			rw.Write([]byte(fmt.Sprint(session)))
+	})))).Methods(http.MethodGet)
+
 	// FILESERVERS
 	/*r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
 		negroni.HandlerFunc(SetContentType("application/javascript")),
 		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))*/
-	r.Path("/{path:.*\\.js$}").Handler(commonMiddleware.With(
-		negroni.HandlerFunc(SetContentType("application/javascript")),
-		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
 
 	r.PathPrefix(mediaDirectory).Handler(commonMiddleware.With(
 		negroni.HandlerFunc(SetMediaContentType),
@@ -106,23 +112,7 @@ func main() {
 
 func IndexHandler(entrypoint string) func(w http.ResponseWriter, r *http.Request) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		fileBytes, _ := ioutil.ReadFile(entrypoint)
-		fileText := string(fileBytes)
-		t, _:= template.New("entry").Parse(fileText)
-		replace := struct {
-			Header string
-			Footer string
-			CommonScripts string
-			CommonSheets string
-		} {
-			LoadHeader(r),
-			LoadFooter(),
-			LoadCommonScripts(),
-			LoadCommonSheets(),
-		}
-
-		t.Execute(w, replace)
-		//http.ServeFile(w, r, entrypoint)
+		http.ServeFile(w, r, entrypoint)
 	}
 	return fn
 }

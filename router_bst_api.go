@@ -171,6 +171,8 @@ func EagateLoginPost(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println(string(body))
+
 	loginRequest := bst_models.LoginRequest{}
 	json.Unmarshal(body, &loginRequest)
 
@@ -427,161 +429,10 @@ func DdrStatsGetImpl(token string) (stats string) {
 
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
-
-	statsFromServer := make([]bst_models.DdrStatisticsTable, 0)
-
-	err = json.Unmarshal(body, &statsFromServer)
 	if err != nil {
 		stats = "<a>API Error</a>"
 		return
 	}
-
-stats = `<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
-    Filtering
-  </button>
-</p>
-<div class="collapse" id="collapseFilter">
-  <div class="card card-body">
-	<div class="container">
-		<div class="row">
-			<div class="container col-4">
-				<div class="row">Levels</div>
-				<div class="row">
-					<div class="col enabled level-filter" id="level-filter-1">1</div>
-					<div class="col enabled level-filter" id="level-filter-2">2</div>
-					<div class="col enabled level-filter" id="level-filter-3">3</div>
-					<div class="col enabled level-filter" id="level-filter-4">4</div>
-					<div class="col enabled level-filter" id="level-filter-5">5</div>
-				</div>
-				<div class="row">
-					<div class="col enabled level-filter" id="level-filter-6">6</div>
-					<div class="col enabled level-filter" id="level-filter-7">7</div>
-					<div class="col enabled level-filter" id="level-filter-8">8</div>
-					<div class="col enabled level-filter" id="level-filter-9">9</div>
-					<div class="col enabled level-filter" id="level-filter-10">10</div>
-				</div>
-				<div class="row">
-					<div class="col enabled level-filter" id="level-filter-11">11</div>
-					<div class="col enabled level-filter" id="level-filter-12">12</div>
-					<div class="col enabled level-filter" id="level-filter-13">13</div>
-					<div class="col enabled level-filter" id="level-filter-14">14</div>
-					<div class="col enabled level-filter" id="level-filter-15">15</div>
-				</div>
-				<div class="row">
-					<div class="col enabled level-filter" id="level-filter-16">16</div>
-					<div class="col enabled level-filter" id="level-filter-17">17</div>
-					<div class="col enabled level-filter" id="level-filter-18">18</div>
-					<div class="col enabled level-filter" id="level-filter-19">19</div>
-					<div class="col"></div>
-				</div>
-				<div class="row">
-					<div class="col"></div>
-					<div class="col" id="level-filter-all-enable">All</div>
-					<div class="col"></div>
-					<div class="col" id="level-filter-all-disable">None</div>
-					<div class="col"></div>
-				</div>
-			</div>
-			<div class="container col-4">
-				<div class="row">Mode</div>
-				<div class="row">
-					<span><input type="checkbox" id="single-filter" name="single-filter" checked> SINGLE</span>
-          		    <span><input type="checkbox" id="double-filter" name="double-filter" checked> DOUBLE</span>
-				</div>
-			</div>
-			<div class="container col-6">
-				<div class="row">Difficulty</div>
-				<div class="row">
-					<span><input type="checkbox" id="beginner-filter" name="beginner-filter" checked> BEGINNER</span>
-					<span><input type="checkbox" id="basic-filter" name="basic-filter" checked> BASIC</span>
-					<span><input type="checkbox" id="difficult-filter" name="difficult-filter" checked> DIFFICULT </span>
-				</div>
-				<div class="row">
-					<span><input type="checkbox" id="expert-filter" name="expert-filter" checked> EXPERT</span>
-					<span><input type="checkbox" id="challenge-filter" name="challenge-filter" checked> CHALLENGE</span>
-				</div>
-			</div>
-			<div class="container col-8">
-				<div class="row">Lamp</div>
-				<div class="row">
-					<span><input type="checkbox" id="unplayed-filter" name="unplayed-filter" checked> NOT PLAYED</span>
-					<span><input type="checkbox" id="fail-filter" name="fail-filter" checked> FAIL</span>
-					<span><input type="checkbox" id="clear-filter" name="clear-filter" checked> CLEAR</span>
-				</div>
-				<div class="row">
-					<span><input type="checkbox" id="good-filter" name="good-filter" checked> GOOD FC</span>
-					<span><input type="checkbox" id="great-filter" name="great-filter" checked> GREAT FC</span>
-					<span><input type="checkbox" id="perfect-filter" name="perfect-filter" checked> PERFECT FC</span>
-					<span><input type="checkbox" id="marvellous-filter" name="marvellous-filter" checked> MARVELLOUS FC</span>
-				</div>
-			</div>
-		</div>
-	</div>
-	</div>
-	</div>
-	<table id="stats" class="display" style="width:100%">
-        <thead>
-            <tr>
-                <th>Level</th>
-                <th>Song Name</th>
-                <th>Artist</th>
-                <th>Mode</th>
-                <th>Difficulty</th>
-                <th>Clear Lamp</th>
-                <th>Rank</th>
-                <th>Score</th>
-                <th>Play Count</th>
-                <th>Clear Count</th>
-                <th>Max Combo</th>
-            </tr>
-        </thead>
-        <tbody>`
-	for _, stat := range statsFromServer {
-		stats = fmt.Sprintf(`%s
-            <tr>
-                <td>%d</td>
-                <td>%s</td>
-                <td>%s</td>
-                <td>%s</td>
-                <td>%s</td>
-                <td>%s</td>
-                <td>%s</td>
-                <td>%d</td>
-                <td>%d</td>
-                <td>%d</td>
-                <td>%d</td>
-            </tr>`,
-            stats,
-            stat.Level,
-            stat.Title,
-            stat.Artist,
-            stat.Mode,
-            stat.Difficulty,
-            stat.Lamp,
-            stat.Rank,
-            stat.Score,
-            stat.PlayCount,
-            stat.ClearCount,
-            stat.MaxCombo)
-	}
-	stats = fmt.Sprintf(`%s
-        </tbody>
-        <tfoot>
-            <tr>
-                <th>Level</th>
-                <th>Song Name</th>
-                <th>Artist</th>
-                <th>Mode</th>
-                <th>Difficulty</th>
-                <th>Clear Lamp</th>
-                <th>Rank</th>
-                <th>Score</th>
-                <th>Play Count</th>
-                <th>Clear Count</th>
-                <th>Max Combo</th>
-            </tr>
-        </tfoot>
-    </table>`, stats)
-
+	stats = string(body)
 	return
 }

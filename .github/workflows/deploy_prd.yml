@@ -46,8 +46,6 @@ jobs:
         EOF
         chmod 400 id_rsa
         scp -o StrictHostKeyChecking=no -i "id_rsa" bst_web ${{ secrets.API_SERVER_USER }}@${{ secrets.API_SERVER_IP }}:${{ secrets.API_SERVER_DEST }}
-        scp -o StrictHostKeyChecking=no -i "id_rsa" -r templates ${{ secrets.API_SERVER_USER }}@${{ secrets.API_SERVER_IP }}:${{ secrets.API_SERVER_DEST }}
-        scp -o StrictHostKeyChecking=no -i "id_rsa" -r dist ${{ secrets.API_SERVER_USER }}@${{ secrets.API_SERVER_IP }}:${{ secrets.API_SERVER_DEST }}
         rm id_rsa
 
     - name: Start Service
