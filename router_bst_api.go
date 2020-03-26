@@ -23,7 +23,7 @@ func InitClient() {
 			return http.ErrUseLastResponse
 		},
 		Jar:           nil,
-		Timeout:       time.Second * 45,
+		Timeout:       time.Second * 60,
 	}
 }
 
