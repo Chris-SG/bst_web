@@ -46,6 +46,8 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 		negroni.Wrap(http.HandlerFunc(DdrRefreshPatch)))).Methods(http.MethodPatch)
 	bstApiRouter.Path("/ddr_stats").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(DdrStatsGet)))).Methods(http.MethodGet)
+	bstApiRouter.Path("/ddr_profile").Handler(negroni.New(
+		negroni.Wrap(http.HandlerFunc(DdrProfileGet)))).Methods(http.MethodGet)
 
 
 	return bstApiRouter
@@ -436,5 +438,54 @@ func DdrStatsGetImpl(token string) (stats string) {
 		return
 	}
 	stats = string(body)
+	return
+}
+
+func DdrProfileGet(rw http.ResponseWriter, r *http.Request) {
+	token, err := TokenForRequest(r)
+	if err != nil {
+		status := bst_models.Status{
+			Status:  "bad",
+			Message: err.Error(),
+		}
+
+		bytes, _ := json.Marshal(status)
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write(bytes)
+		return
+	}
+
+	stats := DdrProfileGetImpl(token)
+	if len(stats) == 0 {
+		rw.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+	rw.Write([]byte(stats))
+	return
+}
+
+func DdrProfileGetImpl(token string) (profile string) {
+	uri, _ := url.Parse("https://" + bstApi + bstApiBase + "ddr/profile")
+
+	req := &http.Request{
+		Method:           http.MethodGet,
+		URL:              uri,
+		Header:			  make(map[string][]string),
+	}
+	req.Header.Add("Authorization", "Bearer " + token)
+
+	res, err := bstApiClient.Do(req)
+	if err != nil {
+		return
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return
+	}
+	profile = string(body)
 	return
 }
