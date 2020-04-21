@@ -8,6 +8,7 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 )
@@ -15,6 +16,7 @@ import (
 var (
 	commonMiddleware *negroni.Negroni
 	protectionMiddleware *negroni.Negroni
+	cachingMiddleware *negroni.Negroni
 )
 
 func main() {
@@ -36,12 +38,16 @@ func main() {
 	protectionMiddleware = negroni.New(
 		negroni.HandlerFunc(ProtectedResourceMiddleware))
 
+	cachingMiddleware = negroni.New(
+		negroni.HandlerFunc(FileCacher))
+
 
 	r.NotFoundHandler = http.HandlerFunc(NotFoundMiddleware)
 
 	r.Path("/{path:.*\\.js$}").Handler(commonMiddleware.With(
 		negroni.HandlerFunc(SetContentType("application/javascript")),
-		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
+		negroni.Wrap(cachingMiddleware.With(
+			negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))))
 
 	// SUB-ROUTERS
 	r.PathPrefix("/external").Handler(commonMiddleware.With(
@@ -207,4 +213,24 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 	rw.Write([]byte(""))
 	return
+}
+
+func FileCacher(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	rw.Header().Set("Cache-Control", "max-age=3600")
+	upath := r.URL.Path
+	path.Clean(upath)
+	root := http.Dir(staticDirectory)
+	fs, _ := root.Open(upath)
+
+	var modTime time.Time
+	fi, err := fs.Stat()
+	if err != nil {
+		modTime = fi.ModTime()
+	} else {
+		modTime = time.Now()
+	}
+	etag := "\"" + upath + modTime.String() + "\""
+	rw.Header().Set("Etag", etag)
+
+	next(rw, r)
 }
