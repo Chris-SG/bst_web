@@ -48,6 +48,10 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 		negroni.Wrap(http.HandlerFunc(DdrStatsGet)))).Methods(http.MethodGet)
 	bstApiRouter.Path("/ddr_profile").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(DdrProfileGet)))).Methods(http.MethodGet)
+	bstApiRouter.Path("/ddr_scores").Handler(negroni.New(
+		negroni.Wrap(http.HandlerFunc(DdrSongScoresGet)))).Methods(http.MethodGet)
+	bstApiRouter.Path("/ddr_song_scores").Handler(negroni.New(
+		negroni.Wrap(http.HandlerFunc(DdrSongScoresGet)))).Methods(http.MethodGet)
 
 
 	return bstApiRouter
@@ -487,5 +491,58 @@ func DdrProfileGetImpl(token string) (profile string) {
 		return
 	}
 	profile = string(body)
+	return
+}
+
+func DdrSongScoresGet(rw http.ResponseWriter, r *http.Request) {
+	token, err := TokenForRequest(r)
+	if err != nil {
+		status := bst_models.Status{
+			Status:  "bad",
+			Message: err.Error(),
+		}
+
+		bytes, _ := json.Marshal(status)
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write(bytes)
+		return
+	}
+
+	buf := make([]byte, 0)
+	r.Body.Read(buf)
+
+	scores := DdrSongScoresGetImpl(token, buf)
+	if len(scores) == 0 {
+		rw.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+	rw.Write([]byte(scores))
+	return
+}
+
+func DdrSongScoresGetImpl(token string, reqBody []byte) (scores string) {
+	uri, _ := url.Parse("https://" + bstApi + bstApiBase + "ddr/song/scores")
+
+	req := &http.Request{
+		Method:           http.MethodGet,
+		URL:              uri,
+		Header:			  make(map[string][]string),
+		Body: 			  ioutil.NopCloser(bytes.NewReader(reqBody)),
+	}
+	req.Header.Add("Authorization", "Bearer " + token)
+
+	res, err := bstApiClient.Do(req)
+	if err != nil {
+		return
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return
+	}
+	scores = string(body)
 	return
 }
