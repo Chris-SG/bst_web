@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bst_web/utilities"
 	"crypto/tls"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -8,98 +9,74 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net/http"
-	"path"
-	"strings"
 	"time"
 )
 
-var (
-	commonMiddleware *negroni.Negroni
-	protectionMiddleware *negroni.Negroni
-	cachingMiddleware *negroni.Negroni
-)
-
 func main() {
-	LoadConfig()
+	utilities.LoadConfig()
+	utilities.PrepareMiddleware()
 
-	InitStore()
-	InitClient()
+	utilities.InitStore()
+	utilities.InitClient()
 
 	r := mux.NewRouter()
-	logger := negroni.NewLogger()
-
-	// MIDDLEWARE DEFINITIONS
-	commonMiddleware = negroni.New(
-		negroni.HandlerFunc(logger.ServeHTTP),
-		negroni.HandlerFunc(PathSanitizer),
-		negroni.HandlerFunc(RefreshJwt),
-		negroni.HandlerFunc(LogoutIfExpired))
-
-	protectionMiddleware = negroni.New(
-		negroni.HandlerFunc(ProtectedResourceMiddleware))
-
-	cachingMiddleware = negroni.New(
-		negroni.HandlerFunc(FileCacher))
 
 
-	r.NotFoundHandler = http.HandlerFunc(NotFoundMiddleware)
+	r.NotFoundHandler = http.HandlerFunc(utilities.NotFoundMiddleware)
 
-	r.Path("/{path:.*\\.js$}").Handler(commonMiddleware.With(
+	r.Path("/{path:.*\\.js$}").Handler(utilities.GetCommonMiddleware().With(
 		negroni.HandlerFunc(SetContentType("application/javascript")),
-		negroni.Wrap(cachingMiddleware.With(
-			negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))))
+		negroni.Wrap(utilities.GetCachingMiddleware().With(
+			negroni.Wrap(http.FileServer(http.Dir(utilities.StaticDirectory)))))))
 
 	// SUB-ROUTERS
-	r.PathPrefix("/external").Handler(commonMiddleware.With(
+	r.PathPrefix("/external").Handler(utilities.GetCommonMiddleware().With(
 		negroni.Wrap(CreateExternalRouters("", nil))))
 
-	r.PathPrefix("/user").Handler(commonMiddleware.With(
-		negroni.Wrap(protectionMiddleware.With(
+	r.PathPrefix("/user").Handler(utilities.GetCommonMiddleware().With(
+		negroni.Wrap(utilities.GetProtectionMiddleware().With(
 			negroni.Wrap(UserRouter())))))
 
-	r.PathPrefix("/ddr").Handler(commonMiddleware.With(
+	r.PathPrefix("/ddr").Handler(utilities.GetCommonMiddleware().With(
 		negroni.Wrap(DdrRouter())))
 
 	AttachAuthRoutes(r)
 
-	r.Path("/whoami").Handler(commonMiddleware.With(
+	r.Path("/whoami").Handler(utilities.GetCommonMiddleware().With(
 		negroni.Wrap(http.HandlerFunc(WhoAmI)))).Methods(http.MethodGet)
 
-	r.Path("/token").Handler(commonMiddleware.With(
+	r.Path("/token").Handler(utilities.GetCommonMiddleware().With(
 		negroni.Wrap(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-			session, _ := Store.Get(r, "auth-session")
+			session, _ := utilities.Store.Get(r, "auth-session")
 			rw.WriteHeader(http.StatusOK)
 			rw.Write([]byte(fmt.Sprint(session)))
 	})))).Methods(http.MethodGet)
 
 	// FILESERVERS
-	/*r.PathPrefix(javascriptDirectory).Handler(commonMiddleware.With(
-		negroni.HandlerFunc(SetContentType("application/javascript")),
-		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))*/
 
-	r.PathPrefix(mediaDirectory).Handler(commonMiddleware.With(
+	r.PathPrefix(utilities.MediaDirectory).Handler(utilities.GetCommonMiddleware().With(
 		negroni.HandlerFunc(SetMediaContentType),
-		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
+		negroni.Wrap(http.FileServer(http.Dir(utilities.StaticDirectory)))))
 
-	r.PathPrefix(cssDirectory).Handler(commonMiddleware.With(
+	r.PathPrefix(utilities.CssDirectory).Handler(utilities.GetCommonMiddleware().With(
 		negroni.HandlerFunc(SetContentType("text/css")),
-		negroni.Wrap(http.FileServer(http.Dir(staticDirectory)))))
+		negroni.Wrap(http.FileServer(http.Dir(utilities.StaticDirectory)))))
 
-	r.PathPrefix("/").Handler(commonMiddleware.With(
-		negroni.HandlerFunc(RedirectHomeMiddleware),
-		negroni.Wrap(http.HandlerFunc(IndexHandler(staticDirectory + indexPage)))))
+	r.PathPrefix("/").Handler(utilities.GetCommonMiddleware().With(
+		negroni.HandlerFunc(utilities.RedirectHomeMiddleware),
+		negroni.Wrap(http.HandlerFunc(IndexHandler(utilities.StaticDirectory+utilities.IndexPage)))))
 
 	var certManager *autocert.Manager
 
 	certManager = &autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(serveHost),
+		HostPolicy: autocert.HostWhitelist(utilities.ServeHost),
 		Cache: autocert.DirCache("./cert_cache"),
 	}
 
 	srv := &http.Server{
 		Handler:           r,
-		Addr:		":" + servePort,
+		Addr:		":" + utilities.ServePort,
 		ReadTimeout: 15 * time.Second,
 		WriteTimeout: 90 * time.Second,
 		TLSConfig: &tls.Config{
@@ -135,52 +112,6 @@ func SetMediaContentType(rw http.ResponseWriter, r *http.Request, next http.Hand
 	next(rw, r)
 }
 
-func PathSanitizer(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if strings.Contains(r.URL.String(), "..") ||
-	   strings.Contains(r.URL.String(), "./") {
-		NotFoundMiddleware(rw, r)
-		return
-	}
-
-	next(rw, r)
-}
-
-func RedirectHomeMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if r.URL.Path != "/" {
-		NotFoundMiddleware(rw, r)
-		return
-	}
-	next(rw, r)
-}
-
-func NotFoundMiddleware(rw http.ResponseWriter, r *http.Request) {
-	http.Redirect(rw, r, "https://" + r.Host, 301)
-}
-
-func ProtectedResourceMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	session, err := Store.Get(r, "auth-session")
-	if err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if session.Values["profile"] == nil {
-		rw.WriteHeader(http.StatusForbidden)
-		rw.Write([]byte("you are not currently logged in."))
-		return
-	}
-
-	profile := session.Values["profile"].(map[string]interface{})
-	expTime := time.Unix(int64(profile["exp"].(float64)), 0)
-	if expTime.Unix() < time.Now().Unix() {
-		rw.WriteHeader(http.StatusForbidden)
-		rw.Write([]byte("your session has expired."))
-		return
-	}
-
-	next(rw, r)
-}
-
 func OpenResource(path string, resource string) func(rw http.ResponseWriter, r *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		fmt.Println("serving resource")
@@ -189,7 +120,7 @@ func OpenResource(path string, resource string) func(rw http.ResponseWriter, r *
 }
 
 func WhoAmI(rw http.ResponseWriter, r *http.Request) {
-	session, err := Store.Get(r, "auth-session")
+	session, err := utilities.Store.Get(r, "auth-session")
 	if err != nil {
 		rw.WriteHeader(http.StatusOK)
 		rw.Write([]byte(""))
@@ -213,24 +144,4 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 	rw.Write([]byte(""))
 	return
-}
-
-func FileCacher(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	rw.Header().Set("Cache-Control", "max-age=3600")
-	upath := r.URL.Path
-	path.Clean(upath)
-	root := http.Dir(staticDirectory)
-	fs, _ := root.Open(upath)
-
-	var modTime time.Time
-	fi, err := fs.Stat()
-	if err != nil {
-		modTime = fi.ModTime()
-	} else {
-		modTime = time.Now()
-	}
-	etag := "\"" + upath + modTime.String() + "\""
-	rw.Header().Set("Etag", etag)
-
-	next(rw, r)
 }

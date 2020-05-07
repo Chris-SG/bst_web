@@ -1,4 +1,4 @@
-package main
+package utilities
 
 import (
 	"context"
@@ -18,6 +18,7 @@ import (
 	"strings"
 	"time"
 )
+
 var (
 	Store *sessions.FilesystemStore
 )
@@ -49,8 +50,8 @@ func NewAuthenticator() (*Authenticator, error) {
 	conf := oauth2.Config{
 		ClientID:     authClientId,
 		ClientSecret: authClientSecret,
-		RedirectURL:  "https://" + serveHost + callbackResourcePath,
-		Endpoint: 	  provider.Endpoint(),
+		RedirectURL:  "https://" + ServeHost + callbackResourcePath,
+		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "offline_access"},
 	}
 
@@ -305,11 +306,11 @@ func LogoutIfExpired(rw http.ResponseWriter, r *http.Request, next http.HandlerF
 	expTime := time.Unix(int64(profile["exp"].(float64)), 0)
 	if expTime.Unix() < time.Now().Unix() {
 		cookie := &http.Cookie {
-			Name: "auth-session",
-			Value: "",
+			Name:    "auth-session",
+			Value:   "",
 			Expires: time.Unix(0, 0),
-			Domain: serveHost,
-			Path: "/",
+			Domain:  ServeHost,
+			Path:    "/",
 		}
 		http.SetCookie(rw, cookie)
 	}
