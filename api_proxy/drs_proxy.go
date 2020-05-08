@@ -89,24 +89,25 @@ func DrsDetailsGet(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := DrsDetailsGetImpl(token)
+	response, code := DrsDetailsGetImpl(token)
 
-	rw.WriteHeader(http.StatusOK)
+	rw.WriteHeader(code)
 	rw.Write(response)
 	return
 }
 
-func DrsDetailsGetImpl(token string) (response []byte) {
+func DrsDetailsGetImpl(token string) (response []byte, code int) {
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "drs/details")
 
 	req := &http.Request{
-		Method:           http.MethodPatch,
+		Method:           http.MethodGet,
 		URL:              uri,
 		Header:			  make(map[string][]string),
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
 
 	res, err := utilities.GetClient().Do(req)
+	code = res.StatusCode
 	if err != nil {
 		response = []byte(`{"status":"bad","message":"api_err"}`)
 		return

@@ -40,6 +40,9 @@ func main() {
 	r.PathPrefix("/ddr").Handler(utilities.GetCommonMiddleware().With(
 		negroni.Wrap(DdrRouter())))
 
+	r.PathPrefix("/drs").Handler(utilities.GetCommonMiddleware().With(
+		negroni.Wrap(DrsRouter())))
+
 	AttachAuthRoutes(r)
 
 	r.Path("/whoami").Handler(utilities.GetCommonMiddleware().With(

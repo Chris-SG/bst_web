@@ -20,7 +20,7 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 	bstApiRouter.PathPrefix("/ddr").Handler(negroni.New(
 		negroni.Wrap(CreateDdrProxy(prefix + "/api"))))
 	bstApiRouter.PathPrefix("/drs").Handler(negroni.New(
-		negroni.Wrap(CreateDdrProxy(prefix + "/api"))))
+		negroni.Wrap(CreateDrsProxy(prefix + "/api"))))
 	bstApiRouter.Path("/status").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(StatusGet)))).Methods(http.MethodGet)
 	bstApiRouter.Path("/eagate/login").Handler(negroni.New(
