@@ -21,6 +21,9 @@ func CreateDrsProxy(prefix string) *mux.Router {
 	drsProxy.Path("/details").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(DrsDetailsGet)))).Methods(http.MethodGet)
 
+	drsProxy.Path("/tabledata").Handler(negroni.New(
+		negroni.Wrap(http.HandlerFunc(DrsTabledataGet)))).Methods(http.MethodGet)
+
 	return drsProxy
 }
 
@@ -98,6 +101,54 @@ func DrsDetailsGet(rw http.ResponseWriter, r *http.Request) {
 
 func DrsDetailsGetImpl(token string) (response []byte, code int) {
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "drs/details")
+
+	req := &http.Request{
+		Method:           http.MethodGet,
+		URL:              uri,
+		Header:			  make(map[string][]string),
+	}
+	req.Header.Add("Authorization", "Bearer " + token)
+
+	res, err := utilities.GetClient().Do(req)
+	code = res.StatusCode
+	if err != nil {
+		response = []byte(`{"status":"bad","message":"api_err"}`)
+		return
+	}
+
+	defer res.Body.Close()
+	response, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		response = []byte(`{"status":"bad","message":"api_err"}`)
+		return
+	}
+
+	return
+}
+
+func DrsTabledataGet(rw http.ResponseWriter, r *http.Request) {
+	token, err := utilities.TokenForRequest(r)
+	if err != nil {
+		status := bst_models.Status{
+			Status:  "bad",
+			Message: err.Error(),
+		}
+
+		bytes, _ := json.Marshal(status)
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write(bytes)
+		return
+	}
+
+	response, code := DrsTabledataGetImpl(token)
+
+	rw.WriteHeader(code)
+	rw.Write(response)
+	return
+}
+
+func DrsTabledataGetImpl(token string) (response []byte, code int) {
+	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "drs/tabledata")
 
 	req := &http.Request{
 		Method:           http.MethodGet,
