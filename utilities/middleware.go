@@ -2,6 +2,7 @@ package utilities
 
 import (
 	"github.com/urfave/negroni"
+	"io/ioutil"
 	"net/http"
 	"path"
 	"strings"
@@ -68,21 +69,19 @@ func FileCacher(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) 
 func ProtectedResourceMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		UnauthorizedMiddleware(rw, r)
 		return
 	}
 
 	if session.Values["profile"] == nil {
-		rw.WriteHeader(http.StatusForbidden)
-		rw.Write([]byte(`{"status":"bad","message":"you are not currently logged in."}`))
+		UnauthorizedMiddleware(rw, r)
 		return
 	}
 
 	profile := session.Values["profile"].(map[string]interface{})
 	expTime := time.Unix(int64(profile["exp"].(float64)), 0)
 	if expTime.Unix() < time.Now().Unix() {
-		rw.WriteHeader(http.StatusForbidden)
-		rw.Write([]byte(`{"status":"bad","message":"your session has expired."}`))
+		UnauthorizedMiddleware(rw, r)
 		return
 	}
 
@@ -108,5 +107,15 @@ func RedirectHomeMiddleware(rw http.ResponseWriter, r *http.Request, next http.H
 }
 
 func NotFoundMiddleware(rw http.ResponseWriter, r *http.Request) {
-	http.Redirect(rw, r, "https://" + r.Host, 301)
+	fileBytes, _ := ioutil.ReadFile("./dist/general/404.html")
+	rw.WriteHeader(404)
+	rw.Write(fileBytes)
+	return
+}
+
+func UnauthorizedMiddleware(rw http.ResponseWriter, r *http.Request) {
+	fileBytes, _ := ioutil.ReadFile("./dist/general/401.html")
+	rw.WriteHeader(404)
+	rw.Write(fileBytes)
+	return
 }

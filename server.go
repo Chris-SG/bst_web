@@ -38,10 +38,12 @@ func main() {
 			negroni.Wrap(UserRouter())))))
 
 	r.PathPrefix("/ddr").Handler(utilities.GetCommonMiddleware().With(
-		negroni.Wrap(DdrRouter())))
+		negroni.Wrap(utilities.GetProtectionMiddleware().With(
+		negroni.Wrap(DdrRouter())))))
 
 	r.PathPrefix("/drs").Handler(utilities.GetCommonMiddleware().With(
-		negroni.Wrap(DrsRouter())))
+		negroni.Wrap(utilities.GetProtectionMiddleware().With(
+		negroni.Wrap(DrsRouter())))))
 
 	AttachAuthRoutes(r)
 
