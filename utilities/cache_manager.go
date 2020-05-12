@@ -11,6 +11,7 @@ var (
 )
 
 func CreateCaches() {
+	caches = make(map[string]*cache.Cache)
 	caches["users"] = cache.New(15*time.Minute, 20*time.Minute)
 }
 
