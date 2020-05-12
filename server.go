@@ -133,12 +133,12 @@ func OpenResource(path string, resource string) func(rw http.ResponseWriter, r *
 func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 	session, err := utilities.Store.Get(r, "auth-session")
 	if err != nil || session == nil {
-		rw.WriteHeader(http.StatusOK)
+		rw.WriteHeader(http.StatusUnauthorized)
 		rw.Write([]byte(""))
 		return
 	}
 	if _, ok := session.Values["access_token"]; !ok {
-		rw.WriteHeader(http.StatusOK)
+		rw.WriteHeader(http.StatusUnauthorized)
 		rw.Write([]byte(""))
 		return
 	}
@@ -155,7 +155,7 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 				cacheResult = utilities.GetCacheValue("users", sub)
 				if cacheResult == nil {
 					glog.Warningf("cache still could not be found for %s", sub)
-					rw.WriteHeader(http.StatusOK)
+					rw.WriteHeader(http.StatusUnauthorized)
 					rw.Write([]byte(""))
 					return
 				}
@@ -169,7 +169,7 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	rw.WriteHeader(http.StatusOK)
+	rw.WriteHeader(http.StatusUnauthorized)
 	rw.Write([]byte(""))
 	return
 }
