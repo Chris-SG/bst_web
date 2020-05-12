@@ -55,6 +55,8 @@ func main() {
 
 	r.Path("/whoami").Handler(utilities.GetCommonMiddleware().With(
 		negroni.Wrap(http.HandlerFunc(WhoAmI)))).Methods(http.MethodGet)
+	r.Path("/clearcache").Handler(utilities.GetCommonMiddleware().With(
+		negroni.Wrap(http.HandlerFunc(ClearCache)))).Methods(http.MethodGet)
 
 	r.Path("/token").Handler(utilities.GetCommonMiddleware().With(
 		negroni.Wrap(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
@@ -198,4 +200,11 @@ func LoadUserCache(user string) bool {
 
 	glog.Infof("%s cache loaded, user id %d", user, cacheData.Id)
 	return utilities.SetCacheValue("users", user, cacheData)
+}
+
+func ClearCache(rw http.ResponseWriter, r *http.Request) {
+	utilities.ClearCache()
+	rw.WriteHeader(http.StatusOK)
+	rw.Write([]byte(""))
+	return
 }

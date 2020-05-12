@@ -41,3 +41,9 @@ func SetCacheValue(cacheName string, key string, value interface{}) bool {
 
 	return false
 }
+
+func ClearCache() {
+	for _, cache := range caches {
+		cache.Flush()
+	}
+}
