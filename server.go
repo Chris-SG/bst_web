@@ -3,12 +3,15 @@ package main
 import (
 	"bst_web/utilities"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -125,28 +128,75 @@ func OpenResource(path string, resource string) func(rw http.ResponseWriter, r *
 }
 
 func WhoAmI(rw http.ResponseWriter, r *http.Request) {
+	type CacheableData struct {
+		Id int `json:"id"`
+		Nickname string `json:"nickname"`
+		Public bool `json:"public"`
+	}
+
 	session, err := utilities.Store.Get(r, "auth-session")
-	if err != nil {
+	if err != nil || session == nil {
+		rw.WriteHeader(http.StatusOK)
+		rw.Write([]byte(""))
+		return
+	}
+	if _, ok := session.Values["access_token"]; !ok {
 		rw.WriteHeader(http.StatusOK)
 		rw.Write([]byte(""))
 		return
 	}
 
-	if session != nil {
-		if _, ok := session.Values["access_token"]; ok {
-			var nickname string
-			profileMap, ok := session.Values["profile"].(map[string]interface{})
-			if ok {
-				nickname, ok = profileMap["nickname"].(string)
-				if ok {
+	profileMap, ok := session.Values["profile"].(map[string]interface{})
+	if ok {
+		sub, ok := profileMap["sub"].(string)
+		if ok {
+			sub = strings.ToLower(sub)
+			cacheResult := utilities.GetCacheValue("users", sub)
+			if cacheResult == nil {
+				LoadUserCache(sub)
+				cacheResult = utilities.GetCacheValue("users", sub)
+				if cacheResult == nil {
 					rw.WriteHeader(http.StatusOK)
-					rw.Write([]byte(nickname))
+					rw.Write([]byte(""))
 					return
 				}
 			}
+
+			userCache := cacheResult.(CacheableData)
+			user, _ := json.Marshal(userCache)
+			rw.WriteHeader(http.StatusOK)
+			rw.Write(user)
+			return
 		}
 	}
+
 	rw.WriteHeader(http.StatusOK)
 	rw.Write([]byte(""))
 	return
+}
+
+func LoadUserCache(user string) bool {
+	type CacheableData struct {
+		Id int `json:"id"`
+		Nickname string `json:"nickname"`
+		Public bool `json:"public"`
+	}
+
+	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "cache")
+	uri.Query().Set("user", user)
+
+	req := &http.Request{
+		Method:           http.MethodGet,
+		URL:              uri,
+	}
+
+	res, err := utilities.GetClient().Do(req)
+	if err != nil {
+		return false
+	}
+
+	cacheData := CacheableData{}
+	json.NewDecoder(res.Body).Decode(&cacheData)
+
+	return utilities.SetCacheValue("users", user, cacheData)
 }
