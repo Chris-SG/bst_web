@@ -52,7 +52,7 @@ func NewAuthenticator() (*Authenticator, error) {
 		ClientSecret: authClientSecret,
 		RedirectURL:  "https://" + ServeHost + callbackResourcePath,
 		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "profile", "offline_access"},
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "offline_access", "database"},
 	}
 
 	return &Authenticator{
