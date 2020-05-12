@@ -172,7 +172,10 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 
 func LoadUserCache(user string) bool {
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "cache")
-	uri.Query().Set("user", user)
+
+	query := uri.Query()
+	query.Set("user", user)
+	uri.RawQuery = query.Encode()
 
 	req := &http.Request{
 		Method:           http.MethodGet,
