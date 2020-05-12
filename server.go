@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	bst_models "github.com/chris-sg/bst_server_models"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"golang.org/x/crypto/acme/autocert"
@@ -128,12 +129,6 @@ func OpenResource(path string, resource string) func(rw http.ResponseWriter, r *
 }
 
 func WhoAmI(rw http.ResponseWriter, r *http.Request) {
-	type CacheableData struct {
-		Id int `json:"id"`
-		Nickname string `json:"nickname"`
-		Public bool `json:"public"`
-	}
-
 	session, err := utilities.Store.Get(r, "auth-session")
 	if err != nil || session == nil {
 		rw.WriteHeader(http.StatusOK)
@@ -162,7 +157,7 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			userCache := cacheResult.(CacheableData)
+			userCache := cacheResult.(bst_models.UserCache)
 			user, _ := json.Marshal(userCache)
 			rw.WriteHeader(http.StatusOK)
 			rw.Write(user)
@@ -176,12 +171,6 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 }
 
 func LoadUserCache(user string) bool {
-	type CacheableData struct {
-		Id int `json:"id"`
-		Nickname string `json:"nickname"`
-		Public bool `json:"public"`
-	}
-
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "cache")
 	uri.Query().Set("user", user)
 
@@ -195,7 +184,7 @@ func LoadUserCache(user string) bool {
 		return false
 	}
 
-	cacheData := CacheableData{}
+	cacheData := bst_models.UserCache{}
 	json.NewDecoder(res.Body).Decode(&cacheData)
 
 	return utilities.SetCacheValue("users", user, cacheData)
