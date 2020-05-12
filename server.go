@@ -23,6 +23,7 @@ func main() {
 
 	utilities.InitStore()
 	utilities.InitClient()
+	utilities.CreateCaches()
 
 	r := mux.NewRouter()
 

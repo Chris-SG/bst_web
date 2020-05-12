@@ -1,6 +1,7 @@
 package utilities
 
 import (
+	"github.com/golang/glog"
 	"github.com/patrickmn/go-cache"
 	"time"
 )
@@ -20,11 +21,14 @@ func ClearCacheValue(cacheName string, key string) {
 }
 
 func GetCacheValue(cacheName string, key string) interface{} {
+	glog.Infof("finding key %s in cache %s", key, cacheName)
 	if cacheObject, exists := caches[cacheName]; exists && cacheObject != nil {
+		glog.Infof("cache %s found", cacheName)
 		if value, found := cacheObject.Get(key); found {
 			return value
 		}
 	}
+	glog.Infof("cache %s not found", cacheName)
 	return nil
 }
 
