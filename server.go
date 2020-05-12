@@ -132,6 +132,7 @@ func OpenResource(path string, resource string) func(rw http.ResponseWriter, r *
 
 func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 	session, err := utilities.Store.Get(r, "auth-session")
+	rw.Header().Set("Content-Type", "application/json")
 	if err != nil || session == nil {
 		rw.WriteHeader(http.StatusUnauthorized)
 		rw.Write([]byte(""))
