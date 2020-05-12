@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	bst_models "github.com/chris-sg/bst_server_models"
+	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"golang.org/x/crypto/acme/autocert"
@@ -148,9 +149,11 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 			sub = strings.ToLower(sub)
 			cacheResult := utilities.GetCacheValue("users", sub)
 			if cacheResult == nil {
+				glog.Infof("cache not found for %s. Loading from api", sub)
 				LoadUserCache(sub)
 				cacheResult = utilities.GetCacheValue("users", sub)
 				if cacheResult == nil {
+					glog.Warningf("cache still could not be found for %s", sub)
 					rw.WriteHeader(http.StatusOK)
 					rw.Write([]byte(""))
 					return
@@ -171,6 +174,7 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 }
 
 func LoadUserCache(user string) bool {
+	glog.Infof("loading cache for user %s", user)
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "cache")
 
 	query := uri.Query()
@@ -190,5 +194,6 @@ func LoadUserCache(user string) bool {
 	cacheData := bst_models.UserCache{}
 	json.NewDecoder(res.Body).Decode(&cacheData)
 
+	glog.Infof("%s cache loaded, user id %d", user, cacheData.Id)
 	return utilities.SetCacheValue("users", user, cacheData)
 }
