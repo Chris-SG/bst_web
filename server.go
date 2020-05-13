@@ -137,12 +137,12 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	if err != nil || session == nil {
 		rw.WriteHeader(http.StatusUnauthorized)
-		rw.Write([]byte(""))
+		rw.Write([]byte("{}"))
 		return
 	}
 	if _, ok := session.Values["access_token"]; !ok {
 		rw.WriteHeader(http.StatusUnauthorized)
-		rw.Write([]byte(""))
+		rw.Write([]byte("{}"))
 		return
 	}
 
@@ -159,7 +159,7 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 				if cacheResult == nil {
 					glog.Warningf("cache still could not be found for %s", sub)
 					rw.WriteHeader(http.StatusUnauthorized)
-					rw.Write([]byte(""))
+					rw.Write([]byte("{}"))
 					return
 				}
 			}
@@ -173,7 +173,7 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	rw.WriteHeader(http.StatusUnauthorized)
-	rw.Write([]byte(""))
+	rw.Write([]byte("{}"))
 	return
 }
 
