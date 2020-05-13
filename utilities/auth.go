@@ -333,3 +333,18 @@ func TokenForRequest(r *http.Request) (token string, err error) {
 	token = session.Values["id_token"].(string)
 	return
 }
+
+func ProfileForRequest(r *http.Request) (profile map[string]interface{}, err error) {
+	session, err := Store.Get(r, "auth-session")
+
+	if _, ok := session.Values["access_token"]; !ok {
+		err = fmt.Errorf("user is not authenticated")
+		return
+	}
+
+	profile, ok := session.Values["profile"].(map[string]interface{})
+	if !ok {
+		err = fmt.Errorf("could not get profile from session values")
+	}
+	return
+}

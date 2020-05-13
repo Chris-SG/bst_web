@@ -23,6 +23,8 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 		negroni.Wrap(CreateDrsProxy(prefix + "/api"))))
 	bstApiRouter.Path("/status").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(StatusGet)))).Methods(http.MethodGet)
+	bstApiRouter.Path("/bstuser").Handler(negroni.New(
+		negroni.Wrap(http.HandlerFunc(BstUserPut)))).Methods(http.MethodPut)
 	bstApiRouter.Path("/eagate/login").Handler(negroni.New(
 		negroni.Wrap(http.HandlerFunc(EagateLoginGet)))).Methods(http.MethodGet)
 	bstApiRouter.Path("/eagate/login").Handler(negroni.New(
@@ -67,6 +69,83 @@ func StatusGetImpl() (status bst_models.ApiStatus) {
 		status.Api = "unknown"
 	}
 
+	return
+}
+
+// StatusGet will call StatusGetImpl() and return the result.
+func BstUserPut(rw http.ResponseWriter, r *http.Request) {
+	token, err := utilities.TokenForRequest(r)
+	if err != nil {
+		status := bst_models.Status{
+			Status:  "bad",
+			Message: err.Error(),
+		}
+
+		bytes, _ := json.Marshal(status)
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write(bytes)
+		return
+	}
+	profile, err := utilities.ProfileForRequest(r)
+	if err != nil {
+		status := bst_models.Status{
+			Status:  "bad",
+			Message: err.Error(),
+		}
+
+		bytes, _ := json.Marshal(status)
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write(bytes)
+		return
+	}
+	sub, ok := profile["sub"].(string)
+	if !ok {
+		status := bst_models.Status{
+			Status:  "bad",
+			Message: err.Error(),
+		}
+
+		bytes, _ := json.Marshal(status)
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write(bytes)
+		return
+	}
+	user := BstUserPutImpl(token, sub, r)
+
+	bytes, _ := json.Marshal(user)
+	rw.WriteHeader(http.StatusOK)
+	rw.Write(bytes)
+}
+
+// StatusGetImpl will retrieve the current state of the api, the database and eagate.
+func BstUserPutImpl(token string, sub string, r *http.Request) (userCache bst_models.UserCache) {
+	utilities.ClearCacheValue("users", sub)
+	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "bstuser")
+
+	req := &http.Request{
+		Method:           http.MethodPut,
+		URL:              uri,
+		Header:			  make(map[string][]string),
+	}
+	req.Header.Add("Authorization", "Bearer " + token)
+
+	request, err := ioutil.ReadAll(r.Body)
+	req.Body = ioutil.NopCloser(bytes.NewReader(request))
+
+	res, err := utilities.GetClient().Do(req)
+	if err != nil {
+		return
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+
+	err = json.Unmarshal(body, &userCache)
+	if err != nil {
+		return
+	}
+
+	utilities.SetCacheValue("users", sub, userCache)
 	return
 }
 
