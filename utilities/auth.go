@@ -7,6 +7,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
+	bst_models "github.com/chris-sg/bst_server_models"
 	"github.com/coreos/go-oidc"
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
@@ -318,15 +319,16 @@ func LogoutIfExpired(rw http.ResponseWriter, r *http.Request, next http.HandlerF
 }
 
 // TokenRequest retrieves the users id token.
-func TokenForRequest(r *http.Request) (token string, err error) {
-	session, err := Store.Get(r, "auth-session")
-	if err != nil {
-		err = fmt.Errorf("not logged in")
+func TokenForRequest(r *http.Request) (token string, err bst_models.Error) {
+	err = bst_models.ErrorOK
+	session, e := Store.Get(r, "auth-session")
+	if e != nil {
+		err = bst_models.ErrorJwt
 		return
 	}
 
 	if session.Values["id_token"] == nil {
-		err = fmt.Errorf("not logged in")
+		err = bst_models.ErrorJwt
 		return
 	}
 
@@ -334,17 +336,22 @@ func TokenForRequest(r *http.Request) (token string, err error) {
 	return
 }
 
-func ProfileForRequest(r *http.Request) (profile map[string]interface{}, err error) {
-	session, err := Store.Get(r, "auth-session")
+func ProfileForRequest(r *http.Request) (profile map[string]interface{}, err bst_models.Error) {
+	err = bst_models.ErrorOK
+	session, e := Store.Get(r, "auth-session")
+	if e != nil {
+		err = bst_models.ErrorJwt
+		return
+	}
 
 	if _, ok := session.Values["access_token"]; !ok {
-		err = fmt.Errorf("user is not authenticated")
+		err = bst_models.ErrorJwt
 		return
 	}
 
 	profile, ok := session.Values["profile"].(map[string]interface{})
 	if !ok {
-		err = fmt.Errorf("could not get profile from session values")
+		err = bst_models.ErrorJwtProfile
 	}
 	return
 }

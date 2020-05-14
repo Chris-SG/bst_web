@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chris-sg/bst_server_models"
+	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"io/ioutil"
@@ -37,7 +38,10 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 
 // StatusGet will call StatusGetImpl() and return the result.
 func StatusGet(rw http.ResponseWriter, r *http.Request) {
-	status := StatusGetImpl()
+	status, err := StatusGetImpl()
+	if !err.Equals(bst_models.ErrorOK) {
+		glog.Error(err)
+	}
 
 	bytes, _ := json.Marshal(status)
 	rw.WriteHeader(http.StatusOK)
@@ -45,7 +49,8 @@ func StatusGet(rw http.ResponseWriter, r *http.Request) {
 }
 
 // StatusGetImpl will retrieve the current state of the api, the database and eagate.
-func StatusGetImpl() (status bst_models.ApiStatus) {
+func StatusGetImpl() (status bst_models.ApiStatus, err bst_models.Error) {
+	err = bst_models.ErrorOK
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "status")
 
 	status.Api = "bad"
@@ -56,17 +61,23 @@ func StatusGetImpl() (status bst_models.ApiStatus) {
 		Method:           http.MethodGet,
 		URL:              uri,
 	}
-	res, err := utilities.GetClient().Do(req)
-	if err != nil {
+	res, e := utilities.GetClient().Do(req)
+	if e != nil {
+		err = bst_models.ErrorClientRequest
 		return
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	body, e := ioutil.ReadAll(res.Body)
+	if e != nil {
+		err = bst_models.ErrorClientResponse
+		return
+	}
 
-	err = json.Unmarshal(body, &status)
-	if err != nil {
-		status.Api = "unknown"
+	e = json.Unmarshal(body, &status)
+	if e != nil {
+		err = bst_models.ErrorJsonDecode
+		return
 	}
 
 	return
@@ -75,50 +86,45 @@ func StatusGetImpl() (status bst_models.ApiStatus) {
 // StatusGet will call StatusGetImpl() and return the result.
 func BstUserPut(rw http.ResponseWriter, r *http.Request) {
 	token, err := utilities.TokenForRequest(r)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
+
 	profile, err := utilities.ProfileForRequest(r)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
+
 	sub, ok := profile["sub"].(string)
 	if !ok {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+		bytes, _ := json.Marshal(bst_models.ErrorJwtProfile)
+		rw.WriteHeader(bst_models.ErrorJwtProfile.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
-	user := BstUserPutImpl(token, sub, r)
+	user, err := BstUserPutImpl(token, sub, r)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
+		rw.Write(bytes)
+		return
+	}
 
 	bytes, _ := json.Marshal(user)
 	rw.WriteHeader(http.StatusOK)
 	rw.Write(bytes)
+	return
 }
 
 // StatusGetImpl will retrieve the current state of the api, the database and eagate.
-func BstUserPutImpl(token string, sub string, r *http.Request) (userCache bst_models.UserCache) {
+func BstUserPutImpl(token string, sub string, r *http.Request) (userCache bst_models.UserCache, err bst_models.Error) {
+	err = bst_models.ErrorOK
 	utilities.ClearCacheValue("users", sub)
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "bstuser")
 
@@ -129,19 +135,29 @@ func BstUserPutImpl(token string, sub string, r *http.Request) (userCache bst_mo
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
 
-	request, err := ioutil.ReadAll(r.Body)
+	request, e := ioutil.ReadAll(r.Body)
+	if e != nil {
+		err = bst_models.ErrorBadBody
+		return
+	}
 	req.Body = ioutil.NopCloser(bytes.NewReader(request))
 
-	res, err := utilities.GetClient().Do(req)
-	if err != nil {
+	res, e := utilities.GetClient().Do(req)
+	if e != nil {
+		err = bst_models.ErrorClientRequest
 		return
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	body, e := ioutil.ReadAll(res.Body)
+	if e != nil {
+		err = bst_models.ErrorClientResponse
+		return
+	}
 
-	err = json.Unmarshal(body, &userCache)
-	if err != nil {
+	e = json.Unmarshal(body, &userCache)
+	if e != nil {
+		err = bst_models.ErrorJsonDecode
 		return
 	}
 
@@ -151,22 +167,17 @@ func BstUserPutImpl(token string, sub string, r *http.Request) (userCache bst_mo
 
 func EagateLoginGet(rw http.ResponseWriter, r *http.Request) {
 	token, err := utilities.TokenForRequest(r)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
-	status, users := EagateLoginGetImpl(token)
+	err, users := EagateLoginGetImpl(token)
 
-	if status.Status == "bad" {
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusInternalServerError)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
@@ -177,7 +188,8 @@ func EagateLoginGet(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func EagateLoginGetImpl(token string) (status bst_models.Status, users []bst_models.EagateUser){
+func EagateLoginGetImpl(token string) (err bst_models.Error, users []bst_models.EagateUser){
+	err = bst_models.ErrorOK
 
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "user/login")
 
@@ -188,48 +200,39 @@ func EagateLoginGetImpl(token string) (status bst_models.Status, users []bst_mod
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
 
-	res, err := utilities.GetClient().Do(req)
-	if err != nil {
-		status.Status = "bad"
-		status.Message = "api error"
+	res, e := utilities.GetClient().Do(req)
+	if e != nil {
+		err = bst_models.ErrorClientRequest
 		return
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	body, e := ioutil.ReadAll(res.Body)
+	if e != nil {
+		err = bst_models.ErrorClientResponse
+		return
+	}
 
 	users = make([]bst_models.EagateUser, 0)
 	json.Unmarshal(body, &users)
 
-	status.Status = "ok"
-	status.Message = fmt.Sprintf("found %d users", len(users))
 	return
 }
 
 func EagateLoginPost(rw http.ResponseWriter, r *http.Request) {
 	token, err := utilities.TokenForRequest(r)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
 
 	defer r.Body.Close()
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	body, e := ioutil.ReadAll(r.Body)
+	if e != nil {
+		bytes, _ := json.Marshal(bst_models.ErrorBadBody)
+		rw.WriteHeader(bst_models.ErrorBadBody.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
@@ -239,19 +242,19 @@ func EagateLoginPost(rw http.ResponseWriter, r *http.Request) {
 	loginRequest := bst_models.LoginRequest{}
 	json.Unmarshal(body, &loginRequest)
 
-	status := EagateLoginPostImpl(token, loginRequest)
+	err = EagateLoginPostImpl(token, loginRequest)
 
-	bytes, _ := json.Marshal(status)
-	if status.Status == "ok" {
-		rw.WriteHeader(http.StatusOK)
-	} else {
-		rw.WriteHeader(http.StatusInternalServerError)
-	}
+	bytes, _ := json.Marshal(err)
+	if !err.Equals(bst_models.ErrorOK) {}
+
+	rw.WriteHeader(err.CorrespondingHttpCode)
 	rw.Write(bytes)
 	return
 }
 
-func EagateLoginPostImpl(token string, loginRequest bst_models.LoginRequest) (status bst_models.Status) {
+// TODO: use form instead of body
+func EagateLoginPostImpl(token string, loginRequest bst_models.LoginRequest) (err bst_models.Error) {
+	err = bst_models.ErrorOK
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "user/login")
 
 	req := &http.Request{
@@ -264,68 +267,71 @@ func EagateLoginPostImpl(token string, loginRequest bst_models.LoginRequest) (st
 	b, _ := json.Marshal(loginRequest)
 	req.Body = ioutil.NopCloser(bytes.NewReader(b))
 
-	res, err := utilities.GetClient().Do(req)
-	if err != nil {
-		status.Status = "bad"
-		status.Message = "api error"
+	res, e := utilities.GetClient().Do(req)
+	if e != nil {
+		err = bst_models.ErrorClientRequest
 		return
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	json.Unmarshal(body, &status)
+	body, e := ioutil.ReadAll(res.Body)
+	if e != nil {
+		err = bst_models.ErrorClientResponse
+		return
+	}
+	json.Unmarshal(body, &err)
 
 	return
 }
 
+// TODO: use form instead of body
 func EagateLogoutPost(rw http.ResponseWriter, r *http.Request) {
 	token, err := utilities.TokenForRequest(r)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
 
 	defer r.Body.Close()
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	body, e := ioutil.ReadAll(r.Body)
+	if e != nil {
+		bytes, _ := json.Marshal(bst_models.ErrorBadRequest)
+		rw.WriteHeader(bst_models.ErrorBadRequest.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
 
 	logoutRequest := bst_models.LogoutRequest{}
-	err = json.Unmarshal(body, &logoutRequest)
-	fmt.Println(err)
-	fmt.Printf("%s\n", body)
-	fmt.Println(logoutRequest)
-
-	status := EagateLogoutPostImpl(token, logoutRequest)
-
-	bytes, _ := json.Marshal(status)
-	if status.Status == "ok" {
-		rw.WriteHeader(http.StatusOK)
-	} else {
-		fmt.Printf("failed to logout user: %s\n", status.Message)
-		rw.WriteHeader(http.StatusInternalServerError)
+	e = json.Unmarshal(body, &logoutRequest)
+	if e != nil {
+		bytes, _ := json.Marshal(bst_models.ErrorJsonDecode)
+		rw.WriteHeader(bst_models.ErrorJsonDecode.CorrespondingHttpCode)
+		rw.Write(bytes)
+		return
 	}
+
+	err = EagateLogoutPostImpl(token, logoutRequest)
+	bytes, e := json.Marshal(err)
+	if e != nil {
+		bytes, _ := json.Marshal(bst_models.ErrorJsonEncode)
+		rw.WriteHeader(bst_models.ErrorJsonEncode.CorrespondingHttpCode)
+		rw.Write(bytes)
+		return
+	}
+
+	if !err.Equals(bst_models.ErrorOK) {
+		fmt.Printf("failed to logout user: %s\n", err.Message)
+	}
+
+	rw.WriteHeader(bst_models.ErrorJsonEncode.CorrespondingHttpCode)
 	rw.Write(bytes)
 	return
 }
 
-func EagateLogoutPostImpl(token string, logoutRequest bst_models.LogoutRequest) (status bst_models.Status) {
+func EagateLogoutPostImpl(token string, logoutRequest bst_models.LogoutRequest) (err bst_models.Error) {
+	err = bst_models.ErrorOK
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "user/logout")
 
 	req := &http.Request{
@@ -338,16 +344,19 @@ func EagateLogoutPostImpl(token string, logoutRequest bst_models.LogoutRequest) 
 	b, _ := json.Marshal(logoutRequest)
 	req.Body = ioutil.NopCloser(bytes.NewReader(b))
 
-	res, err := utilities.GetClient().Do(req)
-	if err != nil {
-		status.Status = "bad"
-		status.Message = "api error"
+	res, e := utilities.GetClient().Do(req)
+	if e != nil {
+		err = bst_models.ErrorClientRequest
 		return
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	json.Unmarshal(body, &status)
+	body, e := ioutil.ReadAll(res.Body)
+	if e != nil {
+		err = bst_models.ErrorClientResponse
+		return
+	}
+	json.Unmarshal(body, &err)
 
 	return
 }

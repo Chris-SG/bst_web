@@ -33,32 +33,26 @@ func CreateDdrProxy(prefix string) *mux.Router {
 
 func DdrUpdatePatch(rw http.ResponseWriter, r *http.Request) {
 	token, err := utilities.TokenForRequest(r)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
 
-	status := DdrUpdatePatchImpl(token)
+	err = DdrUpdatePatchImpl(token)
 
-	bytes, _ := json.Marshal(status)
-	if status.Status == "ok" {
-		rw.WriteHeader(http.StatusOK)
-	} else {
-		fmt.Printf("failed to update ddr profile: %s\n", status.Message)
-		rw.WriteHeader(http.StatusInternalServerError)
+	bytes, _ := json.Marshal(err)
+	if !err.Equals(bst_models.ErrorOK) {
+		fmt.Printf("failed to update ddr profile: %s\n", err.Message)
 	}
+
+	rw.WriteHeader(err.Code)
 	rw.Write(bytes)
 	return
 }
 
-func DdrUpdatePatchImpl(token string) (status bst_models.Status) {
+func DdrUpdatePatchImpl(token string) (err bst_models.Error) {
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "ddr/profile/update")
 
 	req := &http.Request{
@@ -68,48 +62,45 @@ func DdrUpdatePatchImpl(token string) (status bst_models.Status) {
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
 
-	res, err := utilities.GetClient().Do(req)
-	if err != nil {
-		status.Status = "bad"
-		status.Message = "api error"
+	res, e := utilities.GetClient().Do(req)
+	if e != nil {
+		err = bst_models.ErrorApiInaccessible
 		return
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	json.Unmarshal(body, &status)
+	body, e := ioutil.ReadAll(res.Body)
+	if e != nil {
+		err = bst_models.ErrorApiInaccessible
+		return
+	}
+	json.Unmarshal(body, &err)
 
 	return
 }
 
 func DdrRefreshPatch(rw http.ResponseWriter, r *http.Request) {
 	token, err := utilities.TokenForRequest(r)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
 
-	status := DdrRefreshPatchImpl(token)
+	err = DdrRefreshPatchImpl(token)
 
-	bytes, _ := json.Marshal(status)
-	if status.Status == "ok" {
-		rw.WriteHeader(http.StatusOK)
-	} else {
-		fmt.Printf("failed to refresh ddr profile: %s\n", status.Message)
-		rw.WriteHeader(http.StatusInternalServerError)
+	bytes, _ := json.Marshal(err)
+	if !err.Equals(bst_models.ErrorOK) {
+		fmt.Printf("failed to refresh ddr profile: %s\n", err.Message)
 	}
+
+	rw.WriteHeader(err.CorrespondingHttpCode)
 	rw.Write(bytes)
 	return
 }
 
-func DdrRefreshPatchImpl(token string) (status bst_models.Status) {
+func DdrRefreshPatchImpl(token string) (err bst_models.Error) {
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "ddr/profile/refresh")
 
 	req := &http.Request{
@@ -119,41 +110,46 @@ func DdrRefreshPatchImpl(token string) (status bst_models.Status) {
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
 
-	res, err := utilities.GetClient().Do(req)
-	if err != nil {
-		status.Status = "bad"
-		status.Message = "api error"
+	res, e := utilities.GetClient().Do(req)
+	if e != nil {
+		err = bst_models.ErrorClientRequest
 		return
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	json.Unmarshal(body, &status)
+	body, e := ioutil.ReadAll(res.Body)
+	if e != nil {
+		err = bst_models.ErrorClientResponse
+		return
+	}
+	json.Unmarshal(body, &err)
 
 	return
 }
 
 func DdrStatsGet(rw http.ResponseWriter, r *http.Request) {
 	token, err := utilities.TokenForRequest(r)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
 
-	stats := DdrStatsGetImpl(token)
+	stats, err := DdrStatsGetImpl(token)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
+		rw.Write(bytes)
+		return
+	}
 
 	rw.Write([]byte(stats))
+	rw.WriteHeader(http.StatusOK)
 	return
 }
 
-func DdrStatsGetImpl(token string) (stats string) {
+func DdrStatsGetImpl(token string) (stats string, err bst_models.Error) {
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "ddr/songs/scores/extended")
 
 	req := &http.Request{
@@ -163,39 +159,48 @@ func DdrStatsGetImpl(token string) (stats string) {
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
 
-	res, err := utilities.GetClient().Do(req)
-	if err != nil {
-		stats = "<a>API Error</a>"
+	res, e := utilities.GetClient().Do(req)
+	if e != nil {
+		err = bst_models.ErrorClientRequest
 		return
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		stats = "<a>API Error</a>"
+	body, e := ioutil.ReadAll(res.Body)
+	if e != nil {
+		err = bst_models.ErrorClientResponse
 		return
 	}
+
+	if res.StatusCode != http.StatusOK {
+		json.Unmarshal(body, &err)
+		return
+	}
+
 	stats = string(body)
 	return
 }
 
 func DdrProfileGet(rw http.ResponseWriter, r *http.Request) {
 	token, err := utilities.TokenForRequest(r)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
 
-	stats := DdrProfileGetImpl(token)
+	stats, err := DdrProfileGetImpl(token)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
+		rw.Write(bytes)
+		return
+	}
 	if len(stats) == 0 {
-		rw.WriteHeader(http.StatusUnauthorized)
+		bytes, _ := json.Marshal(bst_models.ErrorDdrStats)
+		rw.WriteHeader(bst_models.ErrorDdrStats.CorrespondingHttpCode)
+		rw.Write(bytes)
 		return
 	}
 
@@ -204,7 +209,8 @@ func DdrProfileGet(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func DdrProfileGetImpl(token string) (profile string) {
+func DdrProfileGetImpl(token string) (profile string, err bst_models.Error) {
+	err = bst_models.ErrorOK
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "ddr/profile")
 
 	req := &http.Request{
@@ -214,30 +220,34 @@ func DdrProfileGetImpl(token string) (profile string) {
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
 
-	res, err := utilities.GetClient().Do(req)
-	if err != nil {
+	res, e := utilities.GetClient().Do(req)
+	if e != nil {
+		err = bst_models.ErrorClientRequest
 		return
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
+	body, e := ioutil.ReadAll(res.Body)
+	if e != nil {
+		err = bst_models.ErrorClientResponse
 		return
 	}
+
+	if res.StatusCode != http.StatusOK {
+		json.Unmarshal(body, &err)
+		return
+	}
+
 	profile = string(body)
 	return
 }
 
+// TODO: query string instead of body
 func DdrSongScoresGet(rw http.ResponseWriter, r *http.Request) {
 	token, err := utilities.TokenForRequest(r)
-	if err != nil {
-		status := bst_models.Status{
-			Status:  "bad",
-			Message: err.Error(),
-		}
-
-		bytes, _ := json.Marshal(status)
-		rw.WriteHeader(http.StatusUnauthorized)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
 		rw.Write(bytes)
 		return
 	}
@@ -245,14 +255,20 @@ func DdrSongScoresGet(rw http.ResponseWriter, r *http.Request) {
 	buf := make([]byte, 0)
 	r.Body.Read(buf)
 
-	response, status := DdrSongScoresGetImpl(token, r.URL.RawQuery)
+	response, err := DdrSongScoresGetImpl(token, r.URL.RawQuery)
+	if !err.Equals(bst_models.ErrorOK) {
+		bytes, _ := json.Marshal(err)
+		rw.WriteHeader(err.CorrespondingHttpCode)
+		rw.Write(bytes)
+		return
+	}
 
-	rw.WriteHeader(status)
+	rw.WriteHeader(http.StatusOK)
 	rw.Write([]byte(response))
 	return
 }
 
-func DdrSongScoresGetImpl(token string, queryParams string) (response string, code int) {
+func DdrSongScoresGetImpl(token string, queryParams string) (response string, err bst_models.Error) {
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "ddr/song/scores")
 	uri.RawQuery = queryParams
 
@@ -263,17 +279,24 @@ func DdrSongScoresGetImpl(token string, queryParams string) (response string, co
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
 
-	res, err := utilities.GetClient().Do(req)
-	code = res.StatusCode
-	if err != nil {
+	res, e := utilities.GetClient().Do(req)
+	if e != nil {
+		err = bst_models.ErrorClientRequest
 		return
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
+	body, e := ioutil.ReadAll(res.Body)
+	if e != nil {
+		err = bst_models.ErrorClientResponse
 		return
 	}
+
+	if res.StatusCode != http.StatusOK {
+		json.Unmarshal(body, &err)
+		return
+	}
+
 	response = string(body)
 	return
 }

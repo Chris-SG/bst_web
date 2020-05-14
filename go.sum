@@ -19,6 +19,10 @@ github.com/chris-sg/bst_server_models v0.0.0-20200512065713-0481221bae30 h1:39GM
 github.com/chris-sg/bst_server_models v0.0.0-20200512065713-0481221bae30/go.mod h1:QAm0zB8hwap1niFFJWwSf7AJz/0Bh1q5RCDvTXP/p4o=
 github.com/chris-sg/bst_server_models v0.0.0-20200512141340-da1bb4923bce h1:kt+sZcSKK9yMEGCLLMUSeAOpVnV/+UJmi+uyBM6w8iY=
 github.com/chris-sg/bst_server_models v0.0.0-20200512141340-da1bb4923bce/go.mod h1:QAm0zB8hwap1niFFJWwSf7AJz/0Bh1q5RCDvTXP/p4o=
+github.com/chris-sg/bst_server_models v0.0.0-20200514062531-820bd72ae796 h1:D5eC2TtahdapvctoHIZ4zUJTKgR4HhqTYPGe9801U94=
+github.com/chris-sg/bst_server_models v0.0.0-20200514062531-820bd72ae796/go.mod h1:QAm0zB8hwap1niFFJWwSf7AJz/0Bh1q5RCDvTXP/p4o=
+github.com/chris-sg/bst_server_models v0.0.0-20200514064219-39b5b2074d5b h1:9S16iAg9dH+C1DWr94U83ea9aNo5J7axq09qvrZYOeE=
+github.com/chris-sg/bst_server_models v0.0.0-20200514064219-39b5b2074d5b/go.mod h1:QAm0zB8hwap1niFFJWwSf7AJz/0Bh1q5RCDvTXP/p4o=
 github.com/coreos/go-oidc v2.2.1+incompatible h1:mh48q/BqXqgjVHpy2ZY7WnWAbenxRjsz9N1i1YxjHAk=
 github.com/coreos/go-oidc v2.2.1+incompatible/go.mod h1:CgnwVTmzoESiwO9qyAFEMiHoZ1nMCKZlZ9V6mm3/LKc=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
