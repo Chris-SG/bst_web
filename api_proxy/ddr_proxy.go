@@ -47,7 +47,7 @@ func DdrUpdatePatch(rw http.ResponseWriter, r *http.Request) {
 		fmt.Printf("failed to update ddr profile: %s\n", err.Message)
 	}
 
-	rw.WriteHeader(err.Code)
+	rw.WriteHeader(err.CorrespondingHttpCode)
 	rw.Write(bytes)
 	return
 }
