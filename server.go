@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"golang.org/x/crypto/acme/autocert"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -57,6 +58,8 @@ func main() {
 		negroni.Wrap(http.HandlerFunc(WhoAmI)))).Methods(http.MethodGet)
 	r.Path("/clearcache").Handler(utilities.GetCommonMiddleware().With(
 		negroni.Wrap(http.HandlerFunc(ClearCache)))).Methods(http.MethodGet)
+	r.Path("/help").Handler(utilities.GetCommonMiddleware().With(
+		negroni.Wrap(http.HandlerFunc(HelpPage)))).Methods(http.MethodGet)
 
 	r.Path("/token").Handler(utilities.GetCommonMiddleware().With(
 		negroni.Wrap(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
@@ -175,6 +178,12 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusUnauthorized)
 	rw.Write([]byte("{}"))
 	return
+}
+
+func HelpPage(rw http.ResponseWriter, r *http.Request) {
+	fileBytes, _ := ioutil.ReadFile("./dist/general/help.html")
+	rw.WriteHeader(200)
+	rw.Write(fileBytes)
 }
 
 func LoadUserCache(user string) bool {
