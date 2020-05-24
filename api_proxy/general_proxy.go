@@ -311,11 +311,11 @@ func EagateLogoutPost(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	err = EagateLogoutPostImpl(token, logoutRequest)
-	bytes, e := json.Marshal(err)
+	b, e := json.Marshal(err)
 	if e != nil {
-		bytes, _ := json.Marshal(bst_models.ErrorJsonEncode)
+		b, _ := json.Marshal(bst_models.ErrorJsonEncode)
 		rw.WriteHeader(bst_models.ErrorJsonEncode.CorrespondingHttpCode)
-		rw.Write(bytes)
+		rw.Write(b)
 		return
 	}
 
@@ -323,8 +323,8 @@ func EagateLogoutPost(rw http.ResponseWriter, r *http.Request) {
 		fmt.Printf("failed to logout user: %s\n", err.Message)
 	}
 
-	rw.WriteHeader(bst_models.ErrorJsonEncode.CorrespondingHttpCode)
-	rw.Write(bytes)
+	rw.WriteHeader(err.CorrespondingHttpCode)
+	rw.Write(b)
 	return
 }
 
