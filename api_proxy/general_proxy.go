@@ -237,8 +237,6 @@ func EagateLoginPost(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(string(body))
-
 	loginRequest := bst_models.LoginRequest{}
 	json.Unmarshal(body, &loginRequest)
 

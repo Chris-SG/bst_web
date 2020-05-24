@@ -47,12 +47,12 @@ Run with:
   - [ ] Ensure store is safely encrypted
   
 ### UI
-- [ ] Header
+- [x] Header
   - [ ] Add logo
   - [x] Add user dropdown menu
-  - [ ] Add links for various games
-    - [ ] DDR
-    - [ ] DRS
+  - [x] Add links for various games
+    - [x] DDR
+    - [x] DRS
 - [ ] Footer
   - [x] API status
   - [ ] Licensing
@@ -66,23 +66,23 @@ Run with:
     - [x] Allow linking BST profile to Eagate profile
     - [ ] Allow linking BST profile to multiple Eagate profiles
   - [x] Allow unlinking eagate profiles
-  - [ ] Improve user page performance
-    - [ ] Async ea link status
+  - [x] Improve user page performance
+    - [x] Async ea link status
   - [ ] Improve linking ux
 - [ ] Profile automation
   - [ ] Opt-In third-party update
-  - [ ] Automatic update user
+  - [x] Automatic update user
 
 ### DDR
 - [ ] Provide ddr API integration
-  - [ ] Profile refresh
+  - [x] Profile refresh
   - [x] Profile update
-  - [ ] Song retrieval
-  - [ ] Score retrieval
-- [ ] Base ddr page
-  - [ ] User details
-  - [ ] Profile update
-  - [ ] Profile refresh
+  - [x] Song retrieval
+  - [x] Score retrieval
+- [x] Base ddr page
+  - [x] User details
+  - [x] Profile update
+  - [x] Profile refresh
 - [ ] Provide song overview
   - [ ] Minified song jacket
   - [ ] Score overview
@@ -96,8 +96,8 @@ Run with:
 - [ ] Improve readme
 - [ ] Add dev build task
 - [x] Add prod build task
-- [ ] Redeploy to a more performant server
-  - [ ] Decide on best region
+- [x] Redeploy to a more performant server
+  - [x] Decide on best region
 - [x] Automatic cert
 
 ### Refactoring
