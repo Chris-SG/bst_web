@@ -60,6 +60,10 @@ func main() {
 		negroni.Wrap(http.HandlerFunc(ClearCache)))).Methods(http.MethodGet)
 	r.Path("/help").Handler(utilities.GetCommonMiddleware().With(
 		negroni.Wrap(http.HandlerFunc(HelpPage)))).Methods(http.MethodGet)
+	r.Path("/privacy").Handler(utilities.GetCommonMiddleware().With(
+		negroni.Wrap(http.HandlerFunc(PrivacyPage)))).Methods(http.MethodGet)
+	r.Path("/termsandconditions").Handler(utilities.GetCommonMiddleware().With(
+		negroni.Wrap(http.HandlerFunc(TacPage)))).Methods(http.MethodGet)
 
 	r.Path("/token").Handler(utilities.GetCommonMiddleware().With(
 		negroni.Wrap(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
@@ -182,6 +186,18 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 
 func HelpPage(rw http.ResponseWriter, r *http.Request) {
 	fileBytes, _ := ioutil.ReadFile("./dist/general/help.html")
+	rw.WriteHeader(200)
+	rw.Write(fileBytes)
+}
+
+func PrivacyPage(rw http.ResponseWriter, r *http.Request) {
+	fileBytes, _ := ioutil.ReadFile("./dist/general/privacy.html")
+	rw.WriteHeader(200)
+	rw.Write(fileBytes)
+}
+
+func TacPage(rw http.ResponseWriter, r *http.Request) {
+	fileBytes, _ := ioutil.ReadFile("./dist/general/tac.html")
 	rw.WriteHeader(200)
 	rw.Write(fileBytes)
 }
