@@ -186,7 +186,7 @@ func WhoAmI(rw http.ResponseWriter, r *http.Request) {
 
 func HelpPage(rw http.ResponseWriter, r *http.Request) {
 	fileBytes, _ := ioutil.ReadFile("./dist/general/help.html")
-	rw.WriteHeader(200)
+	rw.WriteHeader(200)w
 	rw.Write(fileBytes)
 }
 

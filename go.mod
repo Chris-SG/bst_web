@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/auth0/go-jwt-middleware v0.0.0-20190805220309-36081240882b
-	github.com/chris-sg/bst_server_models v0.0.0-20200514064219-39b5b2074d5b
+	github.com/chris-sg/bst_server_models v0.0.0-20200606013407-75071a7e6e5d
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
