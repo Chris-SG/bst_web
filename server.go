@@ -129,7 +129,7 @@ func IndexHandler(entrypoint string) func(http.ResponseWriter, *http.Request) {
 						glog.Infof("resetting cookie for %s", cs[1])
 						cookie := &http.Cookie{
 							Name:    "auth-session",
-							Value:   "",
+							Value:   cs[1],
 							Expires: time.Unix(0, 0),
 							Domain:  utilities.ServeHost,
 							Path:    "/",
