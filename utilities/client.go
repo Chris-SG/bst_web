@@ -2,7 +2,6 @@ package utilities
 
 import (
 	"net/http"
-	"time"
 )
 
 var (
@@ -15,7 +14,7 @@ func InitClient() {
 			return http.ErrUseLastResponse
 		},
 		Jar:           nil,
-		Timeout:       time.Second * 60,
+		Timeout:       0,
 	}
 }
 
