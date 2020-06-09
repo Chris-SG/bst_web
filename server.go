@@ -126,6 +126,7 @@ func IndexHandler(entrypoint string) func(http.ResponseWriter, *http.Request) {
 				if len(dss) == 2 {
 					cookieSet, err := strconv.ParseInt(dss[0], 10, 64)
 					if err == nil && cookieSet < 1591668000 {
+						glog.Infof("resetting cookie for %s", cs[1])
 						cookie := &http.Cookie{
 							Name:    "auth-session",
 							Value:   "",
