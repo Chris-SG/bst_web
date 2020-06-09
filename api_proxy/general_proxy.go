@@ -36,6 +36,13 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 	return bstApiRouter
 }
 
+func AddImpersonateToRequest(r *http.Request, req *http.Request) {
+	if c, err := r.Cookie("impersonate"); err == nil && len(c.Raw) > 0 {
+		req.Header.Set("Impersonate-User", c.Value)
+	}
+}
+
+
 // StatusGet will call StatusGetImpl() and return the result.
 func StatusGet(rw http.ResponseWriter, r *http.Request) {
 	status, err := StatusGetImpl()

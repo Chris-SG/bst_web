@@ -190,7 +190,7 @@ func DdrProfileGet(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stats, err := DdrProfileGetImpl(token)
+	stats, err := DdrProfileGetImpl(token, r)
 	if !err.Equals(bst_models.ErrorOK) {
 		bytes, _ := json.Marshal(err)
 		rw.WriteHeader(err.CorrespondingHttpCode)
@@ -209,7 +209,7 @@ func DdrProfileGet(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func DdrProfileGetImpl(token string) (profile string, err bst_models.Error) {
+func DdrProfileGetImpl(token string, r *http.Request) (profile string, err bst_models.Error) {
 	err = bst_models.ErrorOK
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "ddr/profile")
 
@@ -219,6 +219,7 @@ func DdrProfileGetImpl(token string) (profile string, err bst_models.Error) {
 		Header:			  make(map[string][]string),
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
+	AddImpersonateToRequest(r, req)
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
