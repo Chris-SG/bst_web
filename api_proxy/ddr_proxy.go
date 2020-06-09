@@ -40,7 +40,7 @@ func DdrUpdatePatch(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = DdrUpdatePatchImpl(token)
+	err = DdrUpdatePatchImpl(token, r)
 
 	bytes, _ := json.Marshal(err)
 	if !err.Equals(bst_models.ErrorOK) {
@@ -52,7 +52,7 @@ func DdrUpdatePatch(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func DdrUpdatePatchImpl(token string) (err bst_models.Error) {
+func DdrUpdatePatchImpl(token string, r *http.Request) (err bst_models.Error) {
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "ddr/profile/update")
 
 	req := &http.Request{
@@ -61,6 +61,7 @@ func DdrUpdatePatchImpl(token string) (err bst_models.Error) {
 		Header:			  make(map[string][]string),
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
+	AddImpersonateToRequest(r, req)
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
@@ -88,7 +89,7 @@ func DdrRefreshPatch(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = DdrRefreshPatchImpl(token)
+	err = DdrRefreshPatchImpl(token, r)
 
 	bytes, _ := json.Marshal(err)
 	if !err.Equals(bst_models.ErrorOK) {
@@ -100,7 +101,7 @@ func DdrRefreshPatch(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func DdrRefreshPatchImpl(token string) (err bst_models.Error) {
+func DdrRefreshPatchImpl(token string, r *http.Request) (err bst_models.Error) {
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "ddr/profile/refresh")
 
 	req := &http.Request{
@@ -109,6 +110,7 @@ func DdrRefreshPatchImpl(token string) (err bst_models.Error) {
 		Header:			  make(map[string][]string),
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
+	AddImpersonateToRequest(r, req)
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
@@ -136,7 +138,7 @@ func DdrStatsGet(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stats, err := DdrStatsGetImpl(token)
+	stats, err := DdrStatsGetImpl(token, r)
 	if !err.Equals(bst_models.ErrorOK) {
 		bytes, _ := json.Marshal(err)
 		rw.WriteHeader(err.CorrespondingHttpCode)
@@ -149,7 +151,7 @@ func DdrStatsGet(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func DdrStatsGetImpl(token string) (stats string, err bst_models.Error) {
+func DdrStatsGetImpl(token string, r *http.Request) (stats string, err bst_models.Error) {
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "ddr/songs/scores/extended")
 
 	req := &http.Request{
@@ -158,6 +160,7 @@ func DdrStatsGetImpl(token string) (stats string, err bst_models.Error) {
 		Header:			  make(map[string][]string),
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
+	AddImpersonateToRequest(r, req)
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
@@ -256,7 +259,7 @@ func DdrSongScoresGet(rw http.ResponseWriter, r *http.Request) {
 	buf := make([]byte, 0)
 	r.Body.Read(buf)
 
-	response, err := DdrSongScoresGetImpl(token, r.URL.RawQuery)
+	response, err := DdrSongScoresGetImpl(token, r.URL.RawQuery, r)
 	if !err.Equals(bst_models.ErrorOK) {
 		bytes, _ := json.Marshal(err)
 		rw.WriteHeader(err.CorrespondingHttpCode)
@@ -269,7 +272,7 @@ func DdrSongScoresGet(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func DdrSongScoresGetImpl(token string, queryParams string) (response string, err bst_models.Error) {
+func DdrSongScoresGetImpl(token string, queryParams string, r *http.Request) (response string, err bst_models.Error) {
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "ddr/song/scores")
 	uri.RawQuery = queryParams
 
@@ -279,6 +282,7 @@ func DdrSongScoresGetImpl(token string, queryParams string) (response string, er
 		Header:			  make(map[string][]string),
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
+	AddImpersonateToRequest(r, req)
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {

@@ -37,10 +37,7 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 }
 
 func AddImpersonateToRequest(r *http.Request, req *http.Request) {
-	v, _ := r.Cookie("impersonate")
-	glog.Info(v)
-	glog.Info(v.Value)
-	if c, err := r.Cookie("impersonate"); err == nil && len(c.String()) > 0 {
+	if c, err := r.Cookie("impersonate"); err == nil && len(c.Value) > 0 {
 		glog.Infof("%s impersonate cookie is set", c.String())
 		req.Header.Set("Impersonate-User", c.Value)
 	}
@@ -184,7 +181,7 @@ func EagateLoginGet(rw http.ResponseWriter, r *http.Request) {
 		rw.Write(bytes)
 		return
 	}
-	err, users := EagateLoginGetImpl(token)
+	err, users := EagateLoginGetImpl(token, r)
 
 	if !err.Equals(bst_models.ErrorOK) {
 		bytes, _ := json.Marshal(err)
@@ -199,7 +196,7 @@ func EagateLoginGet(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func EagateLoginGetImpl(token string) (err bst_models.Error, users []bst_models.EagateUser){
+func EagateLoginGetImpl(token string, r *http.Request) (err bst_models.Error, users []bst_models.EagateUser){
 	err = bst_models.ErrorOK
 
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "user/login")
@@ -210,6 +207,7 @@ func EagateLoginGetImpl(token string) (err bst_models.Error, users []bst_models.
 		Header:			  make(map[string][]string),
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
+	AddImpersonateToRequest(r, req)
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {

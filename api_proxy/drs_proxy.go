@@ -36,7 +36,7 @@ func DrsProfilePatch(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = DrsProfilePatchImpl(token)
+	err = DrsProfilePatchImpl(token, r)
 
 	bytes, _ := json.Marshal(err)
 	if !err.Equals(bst_models.ErrorOK) {
@@ -48,7 +48,7 @@ func DrsProfilePatch(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func DrsProfilePatchImpl(token string) (err bst_models.Error) {
+func DrsProfilePatchImpl(token string, r *http.Request) (err bst_models.Error) {
 	err = bst_models.ErrorOK
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "drs/profile")
 
@@ -58,6 +58,7 @@ func DrsProfilePatchImpl(token string) (err bst_models.Error) {
 		Header:			  make(map[string][]string),
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
+	AddImpersonateToRequest(r, req)
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
@@ -87,7 +88,7 @@ func DrsDetailsGet(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := DrsDetailsGetImpl(token)
+	response, err := DrsDetailsGetImpl(token, r)
 
 	if !err.Equals(bst_models.ErrorOK) {
 		bytes, _ := json.Marshal(err)
@@ -101,7 +102,7 @@ func DrsDetailsGet(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func DrsDetailsGetImpl(token string) (response []byte, err bst_models.Error) {
+func DrsDetailsGetImpl(token string, r *http.Request) (response []byte, err bst_models.Error) {
 	err = bst_models.ErrorOK
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "drs/details")
 
@@ -111,6 +112,7 @@ func DrsDetailsGetImpl(token string) (response []byte, err bst_models.Error) {
 		Header:			  make(map[string][]string),
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
+	AddImpersonateToRequest(r, req)
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
@@ -137,7 +139,7 @@ func DrsTabledataGet(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := DrsTabledataGetImpl(token)
+	response, err := DrsTabledataGetImpl(token, r)
 	if !err.Equals(bst_models.ErrorOK) {
 		bytes, _ := json.Marshal(err)
 		rw.WriteHeader(err.CorrespondingHttpCode)
@@ -150,7 +152,7 @@ func DrsTabledataGet(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func DrsTabledataGetImpl(token string) (response []byte, err bst_models.Error) {
+func DrsTabledataGetImpl(token string, r *http.Request) (response []byte, err bst_models.Error) {
 	err = bst_models.ErrorOK
 	uri, _ := url.Parse("https://" + utilities.BstApi + utilities.BstApiBase + "drs/tabledata")
 
@@ -160,6 +162,7 @@ func DrsTabledataGetImpl(token string) (response []byte, err bst_models.Error) {
 		Header:			  make(map[string][]string),
 	}
 	req.Header.Add("Authorization", "Bearer " + token)
+	AddImpersonateToRequest(r, req)
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
