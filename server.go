@@ -3,6 +3,7 @@ package main
 import (
 	"bst_web/utilities"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	bst_models "github.com/chris-sg/bst_server_models"
@@ -113,9 +114,32 @@ func main() {
 	log.Fatal(srv.ListenAndServeTLS("", ""))
 }
 
-func IndexHandler(entrypoint string) func(w http.ResponseWriter, r *http.Request) {
+func IndexHandler(entrypoint string) func(http.ResponseWriter, *http.Request) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, entrypoint)
+		c, _ := r.Cookie("auth-session")
+		glog.Infof("%d vs %d : %s", c.Expires.Unix(), c.String())
+		cs := strings.Split(c.String(), "=")
+		if len(cs) == 2 {
+			ds, err := base64.StdEncoding.DecodeString(cs[1])
+			if err != nil {
+				dss := strings.Split(string(ds), "|")
+				if len(dss) == 2 {
+					glog.Infof("time frmo dss is %d", dss[0])
+					if c != nil && c.Expires.Unix() == 43534 {
+						cookie := &http.Cookie {
+							Name:    "auth-session",
+							Value:   "",
+							Expires: time.Unix(0, 0),
+							Domain:  utilities.ServeHost,
+							Path:    "/",
+						}
+						http.SetCookie(w, cookie)
+					}
+					http.ServeFile(w, r, entrypoint)
+				}
+			}
+		}
+
 	}
 	return fn
 }

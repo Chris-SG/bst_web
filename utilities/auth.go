@@ -9,7 +9,6 @@ import (
 	"fmt"
 	bst_models "github.com/chris-sg/bst_server_models"
 	"github.com/coreos/go-oidc"
-	"github.com/golang/glog"
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
 	"io/ioutil"
@@ -307,10 +306,7 @@ func LogoutIfExpired(rw http.ResponseWriter, r *http.Request, next http.HandlerF
 	profile := session.Values["profile"].(map[string]interface{})
 	expTime := time.Unix(int64(profile["exp"].(float64)), 0)
 
-	tmpExp := time.Date(2019, 07, 9, 1, 45, 0, 0, time.UTC).Unix()
-	glog.Infof("curre %d vs exp %d", expTime.Unix(), tmpExp)
-	if expTime.Unix() < time.Now().Unix() ||
-		expTime.Unix() < tmpExp {
+	if expTime.Unix() < time.Now().Unix() {
 		cookie := &http.Cookie {
 			Name:    "auth-session",
 			Value:   "",
