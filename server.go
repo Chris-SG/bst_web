@@ -15,6 +15,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -119,15 +120,13 @@ func IndexHandler(entrypoint string) func(http.ResponseWriter, *http.Request) {
 		c, _ := r.Cookie("auth-session")
 		cs := strings.SplitN(c.String(), "=", 2)
 		if len(cs) == 2 {
-			glog.Infof("%s #1", cs[1])
 			ds, err := base64.StdEncoding.DecodeString(cs[1])
 			if err == nil {
 				dss := strings.SplitN(string(ds), "|", 2)
 				if len(dss) == 2 {
-					glog.Infof("%s #2", dss[0])
-					glog.Infof("time frmo dss is %s", dss[0])
-					if c != nil && c.Expires.Unix() == 43534 {
-						cookie := &http.Cookie {
+					cookieSet, err := strconv.ParseInt(dss[0], 10, 64)
+					if err == nil && cookieSet < 1591668000 {
+						cookie := &http.Cookie{
 							Name:    "auth-session",
 							Value:   "",
 							Expires: time.Unix(0, 0),
@@ -137,8 +136,6 @@ func IndexHandler(entrypoint string) func(http.ResponseWriter, *http.Request) {
 						http.SetCookie(w, cookie)
 					}
 				}
-			} else {
-				glog.Warningf(err.Error())
 			}
 		}
 		http.ServeFile(w, r, entrypoint)
