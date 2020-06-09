@@ -3,7 +3,6 @@ package main
 import (
 	"bst_web/utilities"
 	"crypto/tls"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	bst_models "github.com/chris-sg/bst_server_models"
@@ -15,7 +14,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -117,29 +115,6 @@ func main() {
 
 func IndexHandler(entrypoint string) func(http.ResponseWriter, *http.Request) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		c, _ := r.Cookie("auth-session")
-		cs := strings.SplitN(c.String(), "=", 2)
-		if len(cs) == 2 {
-			ds, err := base64.StdEncoding.DecodeString(cs[1])
-			if err == nil {
-				dss := strings.SplitN(string(ds), "|", 2)
-				if len(dss) == 2 {
-					cookieSet, err := strconv.ParseInt(dss[0], 10, 64)
-					if err == nil && cookieSet < 1591668000 {
-						glog.Infof("resetting cookie for %s", cs[1])
-						cookie := &http.Cookie{
-							Name:    "auth-session",
-							Value:   "",
-							Expires: time.Unix(0, 0),
-							Domain:  utilities.ServeHost,
-							Path:    "/",
-							HttpOnly: true,
-						}
-						http.SetCookie(w, cookie)
-					}
-				}
-			}
-		}
 		http.ServeFile(w, r, entrypoint)
 	}
 	return fn
