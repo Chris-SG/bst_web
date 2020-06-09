@@ -121,7 +121,7 @@ func IndexHandler(entrypoint string) func(http.ResponseWriter, *http.Request) {
 		if len(cs) == 2 {
 			glog.Infof("%s #1", cs[1])
 			ds, err := base64.StdEncoding.DecodeString(cs[1])
-			if err != nil {
+			if err == nil {
 				dss := strings.SplitN(string(ds), "|", 2)
 				if len(dss) == 2 {
 					glog.Infof("%s #2", dss[0])
