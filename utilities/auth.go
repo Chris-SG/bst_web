@@ -146,10 +146,6 @@ func LoginHandler(rw http.ResponseWriter, r *http.Request) {
 	state := base64.StdEncoding.EncodeToString(b)
 
 	session, err := Store.Get(r, "auth-session")
-	if err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
-	}
 	session.Values["state"] = state
 	err = session.Save(r, rw)
 	if err != nil {
