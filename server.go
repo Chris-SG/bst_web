@@ -122,10 +122,10 @@ func IndexHandler(entrypoint string) func(http.ResponseWriter, *http.Request) {
 			glog.Infof("%s #1", cs[1])
 			ds, err := base64.StdEncoding.DecodeString(cs[1])
 			if err != nil {
-				dss := strings.Split(string(ds), "|")
+				dss := strings.SplitN(string(ds), "|", 2)
 				if len(dss) == 2 {
 					glog.Infof("%s #2", dss[0])
-					glog.Infof("time frmo dss is %d", dss[0])
+					glog.Infof("time frmo dss is %s", dss[0])
 					if c != nil && c.Expires.Unix() == 43534 {
 						cookie := &http.Cookie {
 							Name:    "auth-session",
@@ -137,6 +137,8 @@ func IndexHandler(entrypoint string) func(http.ResponseWriter, *http.Request) {
 						http.SetCookie(w, cookie)
 					}
 				}
+			} else {
+				glog.Warningf(err.Error())
 			}
 		}
 		http.ServeFile(w, r, entrypoint)
