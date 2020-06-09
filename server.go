@@ -135,6 +135,7 @@ func IndexHandler(entrypoint string) func(http.ResponseWriter, *http.Request) {
 							Path:    "/",
 						}
 						http.SetCookie(w, cookie)
+						w.Header().Set("Access-Control-Allow-Credentials", "true")
 					}
 				}
 			}
