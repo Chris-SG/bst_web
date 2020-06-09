@@ -39,8 +39,8 @@ func CreateBstApiRouter(prefix string, middleware map[string]*negroni.Negroni) *
 func AddImpersonateToRequest(r *http.Request, req *http.Request) {
 	v, _ := r.Cookie("impersonate")
 	glog.Info(v)
-	glog.Info(v.String())
-	if c, err := r.Cookie("impersonate"); err == nil && len(c.Raw) > 0 {
+	glog.Info(v.Value)
+	if c, err := r.Cookie("impersonate"); err == nil && len(c.String()) > 0 {
 		glog.Infof("%s impersonate cookie is set", c.String())
 		req.Header.Set("Impersonate-User", c.Value)
 	}
