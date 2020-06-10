@@ -65,6 +65,7 @@ func DdrUpdatePatchImpl(token string, r *http.Request) (err bst_models.Error) {
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
+		glog.Errorf("failed request: %s", e.Error())
 		err = bst_models.ErrorApiInaccessible
 		return
 	}
@@ -72,6 +73,7 @@ func DdrUpdatePatchImpl(token string, r *http.Request) (err bst_models.Error) {
 	defer res.Body.Close()
 	body, e := ioutil.ReadAll(res.Body)
 	if e != nil {
+		glog.Errorf("failed request: %s", e.Error())
 		err = bst_models.ErrorApiInaccessible
 		return
 	}
@@ -114,6 +116,7 @@ func DdrRefreshPatchImpl(token string, r *http.Request) (err bst_models.Error) {
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
+		glog.Errorf("failed request: %s", e.Error())
 		err = bst_models.ErrorClientRequest
 		return
 	}
@@ -121,6 +124,7 @@ func DdrRefreshPatchImpl(token string, r *http.Request) (err bst_models.Error) {
 	defer res.Body.Close()
 	body, e := ioutil.ReadAll(res.Body)
 	if e != nil {
+		glog.Errorf("failed request: %s", e.Error())
 		err = bst_models.ErrorClientResponse
 		return
 	}
@@ -164,6 +168,7 @@ func DdrStatsGetImpl(token string, r *http.Request) (stats string, err bst_model
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
+		glog.Errorf("failed request: %s", e.Error())
 		err = bst_models.ErrorClientRequest
 		return
 	}
@@ -171,6 +176,7 @@ func DdrStatsGetImpl(token string, r *http.Request) (stats string, err bst_model
 	defer res.Body.Close()
 	body, e := ioutil.ReadAll(res.Body)
 	if e != nil {
+		glog.Errorf("failed request: %s", e.Error())
 		err = bst_models.ErrorClientResponse
 		return
 	}
@@ -226,6 +232,7 @@ func DdrProfileGetImpl(token string, r *http.Request) (profile string, err bst_m
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
+		glog.Errorf("failed request: %s", e.Error())
 		err = bst_models.ErrorClientRequest
 		return
 	}
@@ -233,6 +240,7 @@ func DdrProfileGetImpl(token string, r *http.Request) (profile string, err bst_m
 	defer res.Body.Close()
 	body, e := ioutil.ReadAll(res.Body)
 	if e != nil {
+		glog.Errorf("failed request: %s", e.Error())
 		err = bst_models.ErrorClientResponse
 		return
 	}
@@ -286,6 +294,7 @@ func DdrSongScoresGetImpl(token string, queryParams string, r *http.Request) (re
 
 	res, e := utilities.GetClient().Do(req)
 	if e != nil {
+		glog.Errorf("failed request: %s", e.Error())
 		err = bst_models.ErrorClientRequest
 		return
 	}
@@ -293,6 +302,7 @@ func DdrSongScoresGetImpl(token string, queryParams string, r *http.Request) (re
 	defer res.Body.Close()
 	body, e := ioutil.ReadAll(res.Body)
 	if e != nil {
+		glog.Errorf("failed request: %s", e.Error())
 		err = bst_models.ErrorClientResponse
 		return
 	}
