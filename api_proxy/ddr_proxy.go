@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	bst_models "github.com/chris-sg/bst_server_models"
+	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 	"io/ioutil"
