@@ -125,7 +125,7 @@ func DdrRefreshPatchImpl(token string, r *http.Request) (err bst_models.Error) {
 	defer res.Body.Close()
 	body, e := ioutil.ReadAll(res.Body)
 	if e != nil {
-		glog.Errorf("failed request: %s", e.Error())
+		glog.Errorf("failed request body: %+v\n", e)
 		err = bst_models.ErrorClientResponse
 		return
 	}
